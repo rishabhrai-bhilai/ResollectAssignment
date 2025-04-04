@@ -24,7 +24,7 @@ function Portfolio() {
   const [tempFilters, setTempFilters] = useState({}); // Temporary filters for mobile drawer
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false); // Track mobile filter drawer
   const [selectedColumn, setSelectedColumn] = useState(null); // Track selected column in mobile filter
-  const itemsPerPage = 6; // Number of items per page
+  const itemsPerPage = 10; // Number of items per page
 
   useEffect(() => {
     setLoading(true);
