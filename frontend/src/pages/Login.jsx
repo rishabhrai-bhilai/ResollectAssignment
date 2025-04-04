@@ -128,8 +128,8 @@ const Login = () => {
         {/* Form Side */}
         <div className="md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-800">Sign In</h1>
-            <p className="text-gray-600 mt-2">Enter any dummy credentials to access your account</p>
+            <h1 className="text-3xl font-bold text-gray-800">Dummy Sign In</h1>
+            <p className="text-gray-600 mt-2">Enter Dummy credentials to access your account</p>
           </div>
 
           {error && (
