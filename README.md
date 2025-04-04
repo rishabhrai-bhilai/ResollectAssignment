@@ -1,6 +1,8 @@
+
 ---
+
 # Loan Portfolio Management System (Frontend)
-Link(https://resollectdashboard.netlify.app/)
+
 A frontend web application for managing a loan portfolio, featuring a data table with filtering, grouping (bucketing), and CRUD operations. The application is built with React and uses a `data.js` file to mimic data that would typically come from a backend API. The project is mobile-responsive and deployed on Netlify.
 
 ---
@@ -8,7 +10,7 @@ A frontend web application for managing a loan portfolio, featuring a data table
 ## Table of Contents
 - [Project Overview](#project-overview)
 - [Features](#features)
-- [Implemented Functionalities](#Implemented-Functionalities)
+- [Implemented Functionalities](#implemented-functionalities)
 - [Tech Stack](#tech-stack)
 - [Project Structure](#project-structure)
 - [Setup Instructions](#setup-instructions)
@@ -46,37 +48,45 @@ This project is a Loan Portfolio Management System (Frontend) that allows users 
 
 ---
 
-Implemented Functionalities
+## Implemented Functionalities
+
 The following functionalities have been implemented in this project:
 
--Proper Pagination:
-Implemented pagination to display a limited number of loans per page (6 items per page).
-Added "Previous" and "Next" buttons for navigation, with the current page and total pages displayed.
--Input Checking to Delete or Update an Item:
-Added a checkbox selection mechanism to ensure users explicitly select loans before deleting or updating them.
-Update and delete buttons are only visible for selected loans, preventing accidental modifications.
--Dummy Sign In, Sign Out:
-Implemented a dummy sign-in and sign-out feature using local state management.
-Displays a "Sign In" button that toggles to "Sign Out" upon clicking, simulating user authentication.
--Filtering Using Search Bar:
-Added a search bar to filter loans based on any field (e.g., borrower name, loan number).
-Filtering is case-insensitive and updates the table dynamically as the user types.
--Bucketing Using Group By Button:
-Implemented a "Group By" dropdown that allows users to group loans by a selected field (e.g., loan type).
-Loans are displayed in separate sections based on the selected grouping field.
--Adding New Items Using Add Item Button:
-Added an "Add Item" button that opens a modal form for creating new loans.
-The new loan is added to the data.js file and reflected in the table.
--Using Same Modal for Updating/Adding Item:
-Utilized a single AddLoanModal component for both adding and updating loans.
-The modal switches between "Add" and "Update" modes based on whether a loan is being edited.
--Completely Responsive Sidebar and Table Content:
-Designed a responsive sidebar that collapses on smaller screens and expands on larger screens.
-The table content switches to a card-based layout on mobile devices, with reduced padding and text size on medium screens.
--Adding Dummy Sidebar Components:
-Added a dummy sidebar with placeholder components (e.g., navigation links like "Dashboard", "Portfolio", "Settings").
-The sidebar is styled to be responsive and includes icons for visual appeal.
+1. **Proper Pagination**:
+   - Implemented pagination to display a limited number of loans per page (6 items per page).
+   - Added "Previous" and "Next" buttons for navigation, with the current page and total pages displayed.
 
+2. **Input Checking to Delete or Update an Item**:
+   - Added a checkbox selection mechanism to ensure users explicitly select loans before deleting or updating them.
+   - Update and delete buttons are only visible for selected loans, preventing accidental modifications.
+
+3. **Dummy Sign In, Sign Out**:
+   - Implemented a dummy sign-in and sign-out feature using local state management.
+   - Displays a "Sign In" button that toggles to "Sign Out" upon clicking, simulating user authentication.
+
+4. **Filtering Using Search Bar**:
+   - Added a search bar to filter loans based on any field (e.g., borrower name, loan number).
+   - Filtering is case-insensitive and updates the table dynamically as the user types.
+
+5. **Bucketing Using Group By Button**:
+   - Implemented a "Group By" dropdown that allows users to group loans by a selected field (e.g., loan type).
+   - Loans are displayed in separate sections based on the selected grouping field.
+
+6. **Adding New Items Using Add Item Button**:
+   - Added an "Add Item" button that opens a modal form for creating new loans.
+   - The new loan is added to the `data.js` file and reflected in the table.
+
+7. **Using Same Modal for Updating/Adding Item**:
+   - Utilized a single `AddLoanModal` component for both adding and updating loans.
+   - The modal switches between "Add" and "Update" modes based on whether a loan is being edited.
+
+8. **Completely Responsive Sidebar and Table Content**:
+   - Designed a responsive sidebar that collapses on smaller screens and expands on larger screens.
+   - The table content switches to a card-based layout on mobile devices, with reduced padding and text size on medium screens.
+
+9. **Adding Dummy Sidebar Components**:
+   - Added a dummy sidebar with placeholder components (e.g., navigation links like "Dashboard", "Portfolio", "Settings").
+   - The sidebar is styled to be responsive and includes icons for visual appeal.
 
 ---
 
@@ -102,7 +112,8 @@ loan-portfolio/
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── AddLoanModal.jsx
-│   │   │   └── DataTable.jsx
+│   │   │   ├── DataTable.jsx
+│   │   │   └── Sidebar.jsx
 │   │   ├── data.js
 │   │   ├── App.jsx
 │   │   ├── index.css
@@ -115,7 +126,7 @@ loan-portfolio/
 ```
 
 - **frontend/**: Contains the React application.
-  - `src/components/`: Reusable React components like the data table and modal.
+  - `src/components/`: Reusable React components like the data table, modal, and sidebar.
   - `src/data.js`: File that mimics backend data and provides functions for CRUD operations.
 - **documentation.md**: Detailed documentation of the code structure, components, and tech stack.
 
@@ -168,13 +179,16 @@ loan-portfolio/
 The application is fully mobile-responsive:
 - **Small Screens (<640px)**:
   - The table switches to a card-based layout, with each loan displayed as a card.
+  - The sidebar collapses into a hamburger menu.
   - Floating action buttons (Filter and Add) are fixed at the bottom-right for easy access.
   - A mobile filter drawer slides up from the bottom for filtering options.
 - **Medium Screens (768px - 1023px)**:
   - The table remains visible but with reduced padding (`px-2 py-1`) and text size (`text-[10px]`) to fit more content.
+  - The sidebar is visible but narrower.
   - Horizontal scrolling is enabled (`overflow-x-auto`) if the table exceeds the viewport width.
 - **Large Screens (1024px and above)**:
   - The table retains its original styling (`px-4 py-2 text-xs`) for optimal readability and spacing.
+  - The sidebar is fully expanded with all components visible.
 
 ---
 
@@ -203,9 +217,9 @@ The application is fully mobile-responsive:
 
 ## Links
 
-- **GitHub Repository**: [https://github.com/rishabhrai-bhilai/](https://github.com/rishabhrai-bhilai/ResollectAssignment)
-- **Live Deployed Link (Frontend)**: [https://resollect.com](https://resollectdashboard.netlify.app/)
-- **Documentation**: [documentation.md](documentation.md)
+- *GitHub Repository*: [https://github.com/rishabhrai-bhilai/](https://github.com/rishabhrai-bhilai/ResollectAssignment)
+- *Live Deployed Link (Frontend)*: [https://resollect.com](https://resollectdashboard.netlify.app/)
+- *Documentation*: [documentation.md](documentation.md)
 
 ---
 
@@ -213,7 +227,7 @@ The application is fully mobile-responsive:
 
 For a detailed explanation of the code structure, components, and tech stack, refer to the [documentation.md](documentation.md) file. It includes:
 - Code structure breakdown.
-- Explanation of key components (e.g., `DataTable.jsx`, `AddLoanModal.jsx`).
+- Explanation of key components (e.g., `DataTable.jsx`, `AddLoanModal.jsx`, `Sidebar.jsx`).
 - Tech stack and library usage.
 - Details on how `data.js` is used to mimic backend data and perform CRUD operations.
 
@@ -222,10 +236,9 @@ For a detailed explanation of the code structure, components, and tech stack, re
 ## Future Improvements
 
 - **Backend Integration**: Replace the `data.js` file with a real backend API using Django and Django Rest Framework.
-- **Testing**: Add unit and integration tests for the frontend using Jest and React Testing Library.
-- **Authentication**: Implement user authentication to secure CRUD operations.
+- **Testing**: Add unit and integration tests for the frontend using Jest and React Testing Library to validate functionality.
+- **Authentication**: Implement real user authentication to secure CRUD operations.
 - **Advanced Filtering**: Add more complex filters (e.g., date ranges, multiple fields).
-- **Pagination on Backend**: If a backend is added, implement server-side pagination to handle large datasets.
 - **Styling Enhancements**: Integrate a component library like Material-UI for a more polished UI.
 
 ---
@@ -235,3 +248,4 @@ For a detailed explanation of the code structure, components, and tech stack, re
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
+
