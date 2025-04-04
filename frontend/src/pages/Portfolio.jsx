@@ -441,12 +441,14 @@ function Portfolio() {
       />
 
       {/* Loans Selected */}
-      <div className="text-xs sm:text-sm text-gray-600 mb-3 bg-white border border-gray-300 rounded-lg px-3 py-1.5 sm:px-4 sm:py-2">
+      <div className="hidden md:block text-xs sm:text-sm text-gray-600 mb-3 bg-white border border-gray-300 rounded-lg px-3 py-1.5 sm:px-4 sm:py-2">
         {selectedLoans.length} loans selected
       </div>
 
       {/* Table for larger screens, Cards for smaller screens */}
-      <div className="bg-white border border-gray-300 rounded-lg shadow">
+      <div className="bg-white md:border md:border-gray-300 md:rounded-lg md:shadow">
+
+
         {/* Table View (hidden on small screens) */}
         <div className="hidden sm:block overflow-x-auto">
           <table className="min-w-full">
@@ -593,141 +595,163 @@ function Portfolio() {
         </div>
 
         {/* Card View (visible on small screens) */}
-        <div className="block sm:hidden space-y-4 p-4">
-          {paginatedLoans.length > 0 ? (
-            paginatedLoans.map((item, index) => {
-              const { loan, group } = item;
-              const showGroupHeader =
-                group &&
-                (index === 0 || paginatedLoans[index - 1].group !== group);
+        {/* Card View (visible on small screens) */}
+<div className="block sm:hidden space-y-4">
+  {paginatedLoans.length > 0 ? (
+    paginatedLoans.map((item, index) => {
+      const { loan, group } = item;
+      const showGroupHeader =
+        group &&
+        (index === 0 || paginatedLoans[index - 1].group !== group);
 
-              return (
-                <div key={loan.id}>
-                  {showGroupHeader && (
-                    <div className="font-bold text-xs text-gray-600 bg-gray-100 p-2 rounded mb-2">
-                      {group}
-                    </div>
-                  )}
-                  <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
-                    <div className="flex justify-between items-start">
-                      <div className="space-y-1">
-                        <h3 className="text-sm font-semibold text-gray-900">{loan.loanNo}</h3>
-                        <p className="text-xs text-gray-600">
-                          {loan.borrower} • {loan.loanType}
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          checked={selectedLoans.includes(loan.id)}
-                          onChange={() => handleSelectLoan(loan.id)}
-                        />
-                        {selectedLoans.includes(loan.id) && (
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={() => handleUpdateLoan(loan)}
-                              className="text-blue-600 hover:text-blue-800"
-                              title="Update"
-                            >
-                              <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0l-1.414-1.414a2 2 0 010-2.828l9.414-9.414z"
-                                />
-                              </svg>
-                            </button>
-                            <button
-                              onClick={() => handleDeleteLoan(loan.id)}
-                              className="text-red-600 hover:text-red-800"
-                              title="Delete"
-                            >
-                              <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4M3 7h18"
-                                />
-                              </svg>
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    {expandedRows[index] && (
-                      <div className="mt-3 pt-3 border-t border-gray-200 text-xs text-gray-700">
-                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                          <div className="grid grid-cols-1 gap-4">
-                            {fields.map((field) => (
-                              <div key={field}>
-                                <span className="font-semibold text-gray-900">{formatFieldName(field)}:</span>{" "}
-                                {field === "sanctionAmount"
-                                  ? `₹ ${loan[field].toLocaleString()}`
-                                  : loan[field]}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    <button
-                      onClick={() => toggleAccordion(index)}
-                      className="mt-3 flex items-center text-blue-600 hover:text-blue-700 text-xs font-medium transition-colors duration-200 focus:outline-none"
-                      aria-label={expandedRows[index] ? "Hide details" : "Show details"}
-                    >
-                      <FontAwesomeIcon
-                        icon={expandedRows[index] ? faChevronUp : faChevronDown}
-                        className="mr-1"
-                      />
-                      {expandedRows[index] ? "Hide Details" : "Show Details"}
-                    </button>
-                  </div>
-                </div>
-              );
-            })
-          ) : (
-            <div className="text-center text-xs text-gray-600 p-4">
-              No loans found.
+      // Define badge colors based on loanType
+      const getBadgeColor = (loanType) => {
+        switch (loanType.toLowerCase()) {
+          case "personal":
+            return "bg-green-100 text-green-800";
+          case "home":
+            return "bg-blue-100 text-blue-800";
+          case "auto":
+            return "bg-purple-100 text-purple-800";
+          default:
+            return "bg-gray-100 text-gray-800";
+        }
+      };
+
+      return (
+        <div key={loan.id}>
+          {showGroupHeader && (
+            <div className="font-bold text-xs text-gray-600 bg-gray-100 p-2 rounded mb-2">
+              {group}
             </div>
           )}
-          {/* Floating Filter and Add Item Buttons */}
-          <div className="fixed bottom-4 right-4 sm:hidden flex space-x-3">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
+            <div className="flex justify-between items-start">
+              <div className="space-y-1">
+                <h3 className="text-sm font-semibold text-gray-900">{loan.loanNo}</h3>
+                <div className="flex items-center space-x-2">
+                  <p className="text-xs text-gray-600">{loan.borrower}</p>
+                  <span
+                    className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full ${getBadgeColor(
+                      loan.loanType
+                    )}`}
+                  >
+                    {loan.loanType}
+                  </span>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={selectedLoans.includes(loan.id)}
+                  onChange={() => handleSelectLoan(loan.id)}
+                />
+                {selectedLoans.includes(loan.id) && (
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => handleUpdateLoan(loan)}
+                      className="text-blue-600 hover:text-blue-800"
+                      title="Update"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0l-1.414-1.414a2 2 0 010-2.828l9.414-9.414z"
+                        />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => handleDeleteLoan(loan.id)}
+                      className="text-red-600 hover:text-red-800"
+                      title="Delete"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4M3 7h18"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+            {expandedRows[index] && (
+              <div className="mt-3 pt-3 border-t border-gray-200 text-xs text-gray-700">
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <div className="grid grid-cols-1 gap-4">
+                    {fields.map((field) => (
+                      <div key={field}>
+                        <span className="font-semibold text-gray-900">{formatFieldName(field)}:</span>{" "}
+                        {field === "sanctionAmount"
+                          ? `₹ ${loan[field].toLocaleString()}`
+                          : loan[field]}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
             <button
-              onClick={openMobileFilter}
-              className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center"
-              aria-label="Open filters"
+              onClick={() => toggleAccordion(index)}
+              className="mt-3 flex items-center text-blue-600 hover:text-blue-700 text-xs font-medium transition-colors duration-200 focus:outline-none"
+              aria-label={expandedRows[index] ? "Hide details" : "Show details"}
             >
-              <FontAwesomeIcon icon={faFilter} className="mr-2" />
-              Filter
-            </button>
-            <button
-              onClick={() => {
-                setIsUpdateMode(false);
-                setLoanToUpdate(null);
-                setIsModalOpen(true);
-              }}
-              className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center"
-              aria-label="Add item"
-            >
-              <FontAwesomeIcon icon={faPlus} className="mr-2" />
-              Add
+              <FontAwesomeIcon
+                icon={expandedRows[index] ? faChevronUp : faChevronDown}
+                className="mr-1"
+              />
+              {expandedRows[index] ? "Hide Details" : "Show Details"}
             </button>
           </div>
         </div>
+      );
+    })
+  ) : (
+    <div className="text-center text-xs text-gray-600 p-4">
+      No loans found.
+    </div>
+  )}
+  {/* Floating Filter and Add Item Buttons */}
+  <div className="fixed bottom-4 right-4 sm:hidden flex space-x-3">
+    <button
+      onClick={openMobileFilter}
+      className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center"
+      aria-label="Open filters"
+    >
+      <FontAwesomeIcon icon={faFilter} className="mr-2" />
+      Filter
+    </button>
+    <button
+      onClick={() => {
+        setIsUpdateMode(false);
+        setLoanToUpdate(null);
+        setIsModalOpen(true);
+      }}
+      className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center"
+      aria-label="Add item"
+    >
+      <FontAwesomeIcon icon={faPlus} className="mr-2" />
+      Add
+    </button>
+  </div>
+</div>
       </div>
 
       {/* Pagination */}

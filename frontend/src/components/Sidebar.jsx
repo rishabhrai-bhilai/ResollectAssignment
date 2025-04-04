@@ -129,7 +129,7 @@ function Sidebar() {
                       <IconComponent className="w-5 h-5 min-w-[60px] flex items-center justify-center" />
                       <span
                         className={`text-base font-medium  whitespace-nowrap transition-opacity duration-300 ease-in-out ${
-                          isClosed ? "opacity-0" : "opacity-100"
+                          isClosed ? "opacity-100" : "opacity-100"
                         } md:opacity-100 `} // Tailwind for text
                       >
                         {link.text}
@@ -149,7 +149,7 @@ function Sidebar() {
         </div>
 
         {/* Footer */}
-        <div className=" hidden md:block px-4 py-4 border-t border-gray-200 flex justify-center items-center">
+        <div className=" hidden md:flex px-4 py-4 border-t border-gray-200 flex justify-center items-center">
           <p className="text-xs text-gray-500">
             Powered by{" "}
             <span className="text-esollect-blue text-lg">
