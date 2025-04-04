@@ -45,6 +45,40 @@ This project is a Loan Portfolio Management System (Frontend) that allows users 
 
 ---
 
+Implemented Functionalities
+The following functionalities have been implemented in this project:
+
+Proper Pagination:
+Implemented pagination to display a limited number of loans per page (6 items per page).
+Added "Previous" and "Next" buttons for navigation, with the current page and total pages displayed.
+Input Checking to Delete or Update an Item:
+Added a checkbox selection mechanism to ensure users explicitly select loans before deleting or updating them.
+Update and delete buttons are only visible for selected loans, preventing accidental modifications.
+Dummy Sign In, Sign Out:
+Implemented a dummy sign-in and sign-out feature using local state management.
+Displays a "Sign In" button that toggles to "Sign Out" upon clicking, simulating user authentication.
+Filtering Using Search Bar:
+Added a search bar to filter loans based on any field (e.g., borrower name, loan number).
+Filtering is case-insensitive and updates the table dynamically as the user types.
+Bucketing Using Group By Button:
+Implemented a "Group By" dropdown that allows users to group loans by a selected field (e.g., loan type).
+Loans are displayed in separate sections based on the selected grouping field.
+Adding New Items Using Add Item Button:
+Added an "Add Item" button that opens a modal form for creating new loans.
+The new loan is added to the data.js file and reflected in the table.
+Using Same Modal for Updating/Adding Item:
+Utilized a single AddLoanModal component for both adding and updating loans.
+The modal switches between "Add" and "Update" modes based on whether a loan is being edited.
+Completely Responsive Sidebar and Table Content:
+Designed a responsive sidebar that collapses on smaller screens and expands on larger screens.
+The table content switches to a card-based layout on mobile devices, with reduced padding and text size on medium screens.
+Adding Dummy Sidebar Components:
+Added a dummy sidebar with placeholder components (e.g., navigation links like "Dashboard", "Portfolio", "Settings").
+The sidebar is styled to be responsive and includes icons for visual appeal.
+
+
+---
+
 ## Tech Stack
 
 - **Frontend**:
