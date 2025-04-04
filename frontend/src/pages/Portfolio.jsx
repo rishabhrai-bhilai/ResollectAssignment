@@ -307,7 +307,7 @@ function Portfolio() {
   }
 
   return (
-    <div className="px-4 py-1 pt-16 md:pt-4">
+    <div className="px-4 py-1 pt-8 md:pt-4">
       <div className="flex justify-between items-center mb-2">
         <h1 className="text-xl sm:text-2xl font-bold">PORTFOLIO</h1>
         <div className="flex items-center space-x-2">
@@ -429,7 +429,7 @@ function Portfolio() {
 
       <div className="bg-white md:border bg-blue-50 md:bg-gray-50 md:border-gray-300 md:rounded-lg md:shadow">
         <div className="hidden sm:block overflow-x-auto">
-          <table className="min-w-full">
+          <table className="min-w-full bg-blue-50 md:bg-gray-50">
             <thead>
               <tr>
                 <th className="px-4 py-2 md:px-2 md:py-1 text-left border-b border-gray-300 text-xs md:text-[10px] text-gray-600">

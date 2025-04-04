@@ -25,9 +25,35 @@ function App() {
               <ProtectedRoute>
                 <div className="flex flex-col min-h-screen">
                   <Header />
+
+                  {/* Icon Heading  for small screen only */}
+                  <div className="sticky md:hidden">
+                    <div className="  flex items-center w-full px-4 py-6">
+                      <svg
+                        className="w-8 h-8 fill-current flex-shrink-0 text-gray-800"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path d="M11 17a1 1 0 001.447.894l4-2A1 1 0 0017 15V9.236a1 1 0 00-1.447-.894l-4 2a1 1 0 00-.553.894V17zM15.211 6.276a1 1 0 000-1.788l-4.764-2.382a1 1 0 00-.894 0L4.789 4.488a1 1 0 000 1.788l4.764 2.382a1 1 0 00.894 0l4.764-2.382zM4.447 8.342A1 1 0 003 9.236V15a1 1 0 00.553.894l4 2A1 1 0 009 17v-5.764a1 1 0 00-.553-.894l-4-2z" />
+                      </svg>
+                      <span
+                        className="ml-2 text-lg font-bold text-gray-800"
+                      >
+                        resollect
+                      </span>
+                    </div>
+                  </div>
+
                   <div className="flex flex-1 relative">
                     <Sidebar />
-                    <div className="flex-1 w-full bg-blue-50 md:bg-gray-50 mt-0 pt-4 md:ml-64 md:mt-16 overflow-auto">
+
+
+
+
+
+
+                    <div className="flex-1 w-full bg-blue-50 md:bg-gray-50 mt-0  md:ml-64 md:mt-16 overflow-auto">
                       <Routes>
                         <Route path="/" element={<Portfolio />} />
                         <Route path="/notifications" element={<Notifications />} />

@@ -86,7 +86,7 @@ function Sidebar() {
         <header className="relative">
           <div className="flex items-center w-full px-4 pt-4 mt-4 pb-3">
             <svg
-              className="w-8 h-8 fill-current flex-shrink-0 text-blue-600"
+              className="w-8 h-8 fill-current flex-shrink-0 text-gray-900"
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 20 20"
               fill="currentColor"
@@ -150,7 +150,7 @@ function Sidebar() {
         </div>
 
         {/* Footer */}
-        <div className={`p-4 border-t border-gray-200 text-center ${
+        <div className={`hidden md:block p-4 border-t border-gray-200 text-center ${
           isClosed ? "hidden" : "block"
         }`}>
           <p className="text-xs text-gray-500">
