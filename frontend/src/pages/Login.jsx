@@ -1,834 +1,284 @@
-import { useState, useEffect, useMemo } from "react";
-import { getLoans, addLoan, updateLoan, deleteLoan } from "../data.js";
-import AddLoanModal from "../components/AddLoanModal";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFilter, faPlus, faMinus, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
+import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
-function Portfolio() {
-  const [loans, setLoans] = useState([]);
-  const [filteredLoans, setFilteredLoans] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedTab, setSelectedTab] = useState("ALL");
-  const [groupBy, setGroupBy] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [selectedLoans, setSelectedLoans] = useState([]); // Track selected loans
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: null }); // Track sorting state
-  const [fields, setFields] = useState([]); // Track dynamic fields from dataset
-  const [currentPage, setCurrentPage] = useState(1); // Track current page
-  const [isModalOpen, setIsModalOpen] = useState(false); // Track modal state
-  const [isUpdateMode, setIsUpdateMode] = useState(false); // Track if modal is in update mode
-  const [loanToUpdate, setLoanToUpdate] = useState(null); // Track the loan to update
-  const [expandedRows, setExpandedRows] = useState({}); // Track expanded rows for mobile view
-  const [columnFilters, setColumnFilters] = useState({}); // Track column filters
-  const [tempFilters, setTempFilters] = useState({}); // Temporary filters for mobile drawer
-  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false); // Track mobile filter drawer
-  const [selectedColumn, setSelectedColumn] = useState(null); // Track selected column in mobile filter
-  const itemsPerPage = 6; // Number of items per page
+const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const { login, isLoading } = useAuth();
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    setLoading(true);
-    try {
-      const fetchedLoans = getLoans();
-      setLoans(fetchedLoans);
-      setFilteredLoans(fetchedLoans);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
 
-      // Dynamically determine fields from the first loan object (excluding 'id')
-      if (fetchedLoans.length > 0) {
-        const loanFields = Object.keys(fetchedLoans[0]).filter((key) => key !== "id");
-        setFields(loanFields);
-      }
-
-      setLoading(false);
-    } catch (err) {
-      setError("Failed to load loans.");
-      setLoading(false);
-    }
-  }, []);
-
-  // Compute unique values for each column for filtering
-  const uniqueValues = useMemo(() => {
-    const values = {};
-    loans.forEach((item) => {
-      fields.forEach((key) => {
-        if (!values[key]) values[key] = new Set();
-        values[key].add(item[key]);
-      });
-    });
-    return Object.fromEntries(Object.entries(values).map(([key, set]) => [key, [...set]]));
-  }, [loans, fields]);
-
-  // Apply column filters
-  const filteredData = useMemo(() => {
-    let data = loans.filter((row) =>
-      fields.some((field) =>
-        String(row[field]).toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    );
-
-    // Apply column filters
-    data = data.filter((row) =>
-      Object.entries(columnFilters).every(([key, selectedValues]) => {
-        if (!selectedValues || selectedValues.length === 0) return true;
-        return selectedValues.includes(row[key]);
-      })
-    );
-
-    // Apply tab filter (if any)
-    if (selectedTab !== "ALL") {
-      // Add custom filtering logic if needed
+    if (!email || !password) {
+      setError('Please fill in all fields');
+      return;
     }
 
-    // Apply group by
-    if (groupBy) {
-      const grouped = data.reduce((acc, loan) => {
-        const key = loan[groupBy];
-        if (!acc[key]) acc[key] = [];
-        acc[key].push(loan);
-        return acc;
-      }, {});
-      return grouped;
+    if (!email.includes('@')) {
+      setError('Please enter a valid email');
+      return;
     }
 
-    // Apply sorting
-    if (sortConfig.key) {
-      data.sort((a, b) => {
-        if (a[sortConfig.key] < b[sortConfig.key])
-          return sortConfig.direction === "ascending" ? -1 : 1;
-        if (a[sortConfig.key] > b[sortConfig.key])
-          return sortConfig.direction === "ascending" ? 1 : -1;
-        return 0;
-      });
-    }
-
-    return data;
-  }, [loans, searchTerm, selectedTab, groupBy, sortConfig, columnFilters, fields]);
-
-  const handleSearch = (e) => {
-    setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to first page on search
-  };
-
-  const handleTabChange = (tab) => {
-    setSelectedTab(tab);
-    setCurrentPage(1); // Reset to first page on tab change
-  };
-
-  const handleGroupBy = (e) => {
-    const value = e.target.value;
-    setGroupBy(value);
-    setCurrentPage(1); // Reset to first page on group change
-  };
-
-  const handleSelectLoan = (loanId) => {
-    setSelectedLoans((prev) =>
-      prev.includes(loanId)
-        ? prev.filter((id) => id !== loanId)
-        : [...prev, loanId]
-    );
-  };
-
-  const handleSelectAll = (e) => {
-    if (e.target.checked) {
-      const allLoanIds = paginatedLoans.map((item) => item.loan.id); // Only select loans on the current page
-      setSelectedLoans(allLoanIds);
+    const success = await login(email, password);
+    if (success) {
+      navigate('/');
     } else {
-      setSelectedLoans([]);
+      setError('Login failed. Please try again.');
     }
   };
-
-  const handleSort = (key) => {
-    let direction = "ascending";
-    if (sortConfig.key === key && sortConfig.direction === "ascending") {
-      direction = "descending";
-    }
-    setSortConfig({ key, direction });
-    setCurrentPage(1); // Reset to first page on sort
-  };
-
-  // Format field names for display (e.g., "loanNo" -> "Loan No")
-  const formatFieldName = (field) => {
-    return field
-      .replace(/([A-Z])/g, " $1")
-      .replace(/^./, (str) => str.toUpperCase())
-      .trim();
-  };
-
-  // Handle adding a new loan
-  const handleAddLoan = (newLoan) => {
-    if (isUpdateMode) {
-      updateLoan(loanToUpdate.id, newLoan); // Update the loan in data.js
-    } else {
-      addLoan(newLoan); // Add to data.js
-    }
-    const updatedLoans = getLoans(); // Fetch updated loans
-    setLoans(updatedLoans);
-    setFilteredLoans(updatedLoans);
-    setIsModalOpen(false); // Close modal
-    setIsUpdateMode(false); // Reset update mode
-    setLoanToUpdate(null); // Clear loan to update
-  };
-
-  // Handle deleting a loan
-  const handleDeleteLoan = (loanId) => {
-    deleteLoan(loanId); // Delete from data.js
-    const updatedLoans = getLoans(); // Fetch updated loans
-    setLoans(updatedLoans);
-    setFilteredLoans(updatedLoans);
-    setSelectedLoans((prev) => prev.filter((id) => id !== loanId)); // Remove from selected loans
-  };
-
-  // Handle updating a loan
-  const handleUpdateLoan = (loan) => {
-    setIsUpdateMode(true);
-    setLoanToUpdate(loan);
-    setIsModalOpen(true);
-  };
-
-  // Toggle accordion for mobile view
-  const toggleAccordion = (rowId) => {
-    setExpandedRows((prev) => ({
-      ...prev,
-      [rowId]: !prev[rowId],
-    }));
-  };
-
-  // Handle column filter checkbox changes
-  const handleCheckboxChange = (column, value) => {
-    setColumnFilters((prev) => {
-      const newFilters = { ...prev };
-      if (!newFilters[column]) newFilters[column] = [];
-      if (newFilters[column].includes(value)) {
-        newFilters[column] = newFilters[column].filter((v) => v !== value);
-      } else {
-        newFilters[column] = [...newFilters[column], value];
-      }
-      return newFilters;
-    });
-  };
-
-  const handleTempCheckboxChange = (column, value) => {
-    setTempFilters((prev) => {
-      const newFilters = { ...prev };
-      if (!newFilters[column]) newFilters[column] = [];
-      if (newFilters[column].includes(value)) {
-        newFilters[column] = newFilters[column].filter((v) => v !== value);
-      } else {
-        newFilters[column] = [...newFilters[column], value];
-      }
-      return newFilters;
-    });
-  };
-
-  const applyMobileFilters = () => {
-    setColumnFilters(tempFilters);
-    setIsMobileFilterOpen(false);
-    setSelectedColumn(null);
-  };
-
-  const openMobileFilter = () => {
-    setIsMobileFilterOpen(true);
-    setTempFilters({ ...columnFilters });
-    setSelectedColumn(null);
-  };
-
-  const closeMobileFilter = () => {
-    setIsMobileFilterOpen(false);
-    setTempFilters({});
-    setSelectedColumn(null);
-  };
-
-  const clearAllFilters = () => {
-    setColumnFilters({});
-    setTempFilters({});
-    setSelectedColumn(null);
-  };
-
-  const handleColumnSelect = (column) => {
-    setSelectedColumn(column === selectedColumn ? null : column);
-  };
-
-  // Flatten grouped data for pagination while preserving group information
-  const flattenGroupedData = () => {
-    if (Array.isArray(filteredData)) {
-      return filteredData.map((loan) => ({ loan, group: null }));
-    }
-
-    const flattened = [];
-    Object.keys(filteredData).forEach((group) => {
-      filteredData[group].forEach((loan) => {
-        flattened.push({ loan, group });
-      });
-    });
-    return flattened;
-  };
-
-  // Pagination Logic
-  const flattenedLoans = flattenGroupedData();
-  const totalItems = flattenedLoans.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-
-  // Ensure currentPage is within valid bounds
-  useEffect(() => {
-    if (currentPage > totalPages && totalPages > 0) {
-      setCurrentPage(totalPages);
-    }
-  }, [totalPages, currentPage]);
-
-  // Get the loans for the current page
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedLoans = flattenedLoans.slice(startIndex, endIndex);
-
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-      setSelectedLoans([]); // Clear selection when changing pages
-    }
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-      setSelectedLoans([]); // Clear selection when changing pages
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="p-4 sm:p-6">
-        <div className="space-y-4 sm:hidden mt-4">
-          {Array(5).fill().map((_, i) => (
-            <div key={i} className="h-32 bg-gray-200 animate-pulse rounded-lg"></div>
-          ))}
-        </div>
-        <div className="hidden sm:block mt-4 bg-white rounded-lg shadow-lg overflow-x-auto">
-          <div className="space-y-2 p-4">
-            {Array(5).fill().map((_, i) => (
-              <div key={i} className="h-12 bg-gray-200 animate-pulse rounded-md"></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-4 sm:p-6 text-red-500">
-        <div className="mt-4 text-center text-red-500 p-4 bg-red-50 rounded-lg border border-red-200">
-          {error}
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="px-4 py-1 pt-16 md:pt-4">
-      <div className="flex justify-between items-center mb-2">
-        <h1 className="text-xl sm:text-2xl font-bold">PORTFOLIO</h1>
-        <button
-          onClick={clearAllFilters}
-          className="hidden sm:block lg:hidden text-red-500 text-sm font-medium hover:text-red-600 transition-colors"
-        >
-          Clear All
-        </button>
-      </div>
-
-      {/* Tabs for filtering loans */}
-      <div className="hidden md:block flex space-x-2 mb-4 overflow-x-auto">
-        {[
-          "ALL",
-          "Pre Sarfaesi",
-          "NPA",
-          "13(3) Responses",
-          "Symbolic Possession",
-          "DM Order",
-          "Physical Possessions",
-          "Auctions",
-        ].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => handleTabChange(tab)}
-            className={`px-3 py-1 text-xs sm:text-sm font-medium rounded-lg border-b-2 transition-colors whitespace-nowrap ${
-              selectedTab === tab
-                ? "bg-blue-600 text-white border-blue-600"
-                : "bg-transparent text-gray-600 border-transparent hover:bg-gray-100"
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-
-      {/* Search and Filter Inputs */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 space-y-2 sm:space-y-0 sm:space-x-2">
-        <input
-          type="text"
-          placeholder="Search Loans"
-          value={searchTerm}
-          onChange={handleSearch}
-          className="border border-gray-300 rounded px-3 py-1 text-xs sm:text-sm w-full sm:w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-          <select
-            value={groupBy}
-            onChange={handleGroupBy}
-            className="border border-gray-300 rounded px-3 py-1 text-xs sm:text-sm text-gray-600 focus:outline-none w-full sm:w-auto"
-          >
-            <option value="">Group By...</option>
-            {fields.map((field) => (
-              <option key={field} value={field}>
-                {formatFieldName(field)}
-              </option>
-            ))}
-          </select>
-          <button className="hidden md:flex bg-blue-600 text-white px-3 py-1 rounded text-xs sm:text-sm font-medium items-center justify-center w-full sm:w-auto">
-            <svg
-              className="w-3 h-3 sm:w-4 sm:h-4 mr-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="max-w-6xl w-full bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row">
+        {/* Illustration Side */}
+        <div className="hidden md:block md:w-1/2 bg-gradient-to-br from-indigo-500 to-blue-600 p-8 flex flex-col items-center justify-center">
+          <div className=" hidden md:block w-full max-w-xs">
+            <svg viewBox="0 0 500 500" className="hidden md:block w-full h-auto">
+              <path 
+                d="M250,400c-83.6,0-150-66.4-150-150s66.4-150,150-150s150,66.4,150,150S333.6,400,250,400z M250,150c-55.2,0-100,44.8-100,100
+                s44.8,100,100,100s100-44.8,100-100S305.2,150,250,150z" 
+                fill="#ffffff" 
+                opacity="0.2"
+              />
+              <path 
+                d="M250,300c-27.6,0-50-22.4-50-50s22.4-50,50-50s50,22.4,50,50S277.6,300,250,300z M250,220c-16.5,0-30,13.5-30,30
+                s13.5,30,30,30s30-13.5,30-30S266.5,220,250,220z" 
+                fill="#ffffff" 
+                opacity="0.2"
+              />
+              <path 
+                d="M250,350c-27.6,0-50-22.4-50-50s22.4-50,50-50s50,22.4,50,50S277.6,350,250,350z M250,270c-16.5,0-30,13.5-30,30
+                s13.5,30,30,30s30-13.5,30-30S266.5,270,250,270z" 
+                fill="#ffffff" 
+                opacity="0.2"
+              />
+              <path 
+                d="M250,250c-27.6,0-50-22.4-50-50s22.4-50,50-50s50,22.4,50,50S277.6,250,250,250z M250,170c-16.5,0-30,13.5-30,30
+                s13.5,30,30,30s30-13.5,30-30S266.5,170,250,170z" 
+                fill="#ffffff" 
+                opacity="0.2"
+              />
+              <path 
+                d="M250,200c-27.6,0-50-22.4-50-50s22.4-50,50-50s50,22.4,50,50S277.6,200,250,200z M250,120c-16.5,0-30,13.5-30,30
+                s13.5,30,30,30s30-13.5,30-30S266.5,120,250,120z" 
+                fill="#ffffff" 
+                opacity="0.2"
+              />
+              <path 
+                d="M250,150c-27.6,0-50-22.4-50-50s22.4-50,50-50s50,22.4,50,50S277.6,150,250,150z M250,70c-16.5,0-30,13.5-30,30
+                s13.5,30,30,30s30-13.5,30-30S266.5,70,250,70z" 
+                fill="#ffffff" 
+                opacity="0.2"
+              />
+              <path 
+                d="M250,100c-27.6,0-50-22.4-50-50s22.4-50,50-50s50,22.4,50,50S277.6,100,250,100z M250,20c-16.5,0-30,13.5-30,30
+                s13.5,30,30,30s30-13.5,30-30S266.5,20,250,20z" 
+                fill="#ffffff" 
+                opacity="0.2"
+              />
+              <path 
+                d="M250,50c-27.6,0-50-22.4-50-50S222.4-50,250-50s50,22.4,50,50S277.6,50,250,50z M250-30c-16.5,0-30,13.5-30,30
+                s13.5,30,30,30s30-13.5,30-30S266.5-30,250-30z" 
+                fill="#ffffff" 
+                opacity="0.2"
+              />
+              <path 
+                d="M250,0c-27.6,0-50-22.4-50-50S222.4-100,250-100s50,22.4,50,50S277.6,0,250,0z M250-80c-16.5,0-30,13.5-30,30
+                s13.5,30,30,30s30-13.5,30-30S266.5-80,250-80z" 
+                fill="#ffffff" 
+                opacity="0.2"
+              />
+              <path 
+                d="M250,450c-27.6,0-50-22.4-50-50s22.4-50,50-50s50,22.4,50,50S277.6,450,250,450z M250,370c-16.5,0-30,13.5-30,30
+                s13.5,30,30,30s30-13.5,30-30S266.5,370,250,370z" 
+                fill="#ffffff" 
+                opacity="0.2"
+              />
+              <path 
+                d="M250,500c-27.6,0-50-22.4-50-50s22.4-50,50-50s50,22.4,50,50S277.6,500,250,500z M250,420c-16.5,0-30,13.5-30,30
+                s13.5,30,30,30s30-13.5,30-30S266.5,420,250,420z" 
+                fill="#ffffff" 
+                opacity="0.2"
+              />
+              <circle cx="250" cy="250" r="100" fill="#ffffff" opacity="0.3"/>
+              <path 
+                d="M250,350c-55.2,0-100-44.8-100-100s44.8-100,100-100s100,44.8,100,100S305.2,350,250,350z M250,170
+                c-44.2,0-80,35.8-80,80s35.8,80,80,80s80-35.8,80-80S294.2,170,250,170z" 
+                fill="#ffffff" 
+                opacity="0.3"
+              />
+              <path 
+                d="M250,400c-83.6,0-150-66.4-150-150s66.4-150,150-150s150,66.4,150,150S333.6,400,250,400z M250,150
+                c-55.2,0-100,44.8-100,100s44.8,100,100,100s100-44.8,100-100S305.2,150,250,150z" 
+                fill="#ffffff" 
+                opacity="0.3"
               />
             </svg>
-            <span>More Filters</span>
-          </button>
-          <button
-            onClick={() => {
-              setIsUpdateMode(false);
-              setLoanToUpdate(null);
-              setIsModalOpen(true);
-            }}
-            className="hidden md:flex bg-blue-600 text-white px-3 py-1 rounded text-xs sm:text-sm font-medium items-center justify-center w-full sm:w-auto"
-          >
-            <svg
-              className="w-3 h-3 sm:w-4 sm:h-4 mr-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            <span>Add Item</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Add/Update Loan Modal */}
-      <AddLoanModal
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setIsUpdateMode(false);
-          setLoanToUpdate(null);
-        }}
-        onSubmit={handleAddLoan}
-        isUpdate={isUpdateMode}
-        initialData={loanToUpdate}
-      />
-
-      {/* Loans Selected */}
-      <div className="text-xs sm:text-sm text-gray-600 mb-3 bg-white border border-gray-300 rounded-lg px-3 py-1.5 sm:px-4 sm:py-2">
-        {selectedLoans.length} loans selected
-      </div>
-
-      {/* Table for larger screens, Cards for smaller screens */}
-      <div className="bg-white border border-gray-300 rounded-lg shadow">
-        {/* Table View (hidden on small screens) */}
-        <div className="hidden sm:block overflow-x-auto">
-          <table className="min-w-full">
-            <thead>
-              <tr>
-                <th className="px-4 py-2 md:px-2 md:py-1 text-left border-b border-gray-300 text-xs md:text-[10px] text-gray-600">
-                  <input
-                    type="checkbox"
-                    onChange={handleSelectAll}
-                    checked={
-                      paginatedLoans.length > 0 &&
-                      paginatedLoans.every((item) => selectedLoans.includes(item.loan.id))
-                    }
-                  />
-                </th>
-                {fields.map((field) => (
-                  <th
-                    key={field}
-                    className="px-4 py-2 md:px-2 md:py-1 text-left border-b border-gray-300 text-xs md:text-[10px] text-gray-600"
-                  >
-                    <div className="flex items-center">
-                      {formatFieldName(field)}
-                      <button onClick={() => handleSort(field)} className="ml-1">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth={1.5}
-                          stroke="currentColor"
-                          className="size-4 md:size-3 text-gray-600"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M3 7.5 7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                  </th>
-                ))}
-                <th className="px-4 py-2 md:px-2 md:py-1 text-left border-b border-gray-300 text-xs md:text-[10px] text-gray-600">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedLoans.length > 0 ? (
-                paginatedLoans.map((item, index) => {
-                  const { loan, group } = item;
-                  const showGroupHeader =
-                    group &&
-                    (index === 0 || paginatedLoans[index - 1].group !== group);
-
-                  return (
-                    <>
-                      {showGroupHeader && (
-                        <tr key={`group-${group}`}>
-                          <td
-                            colSpan={fields.length + 2} // +2 for checkbox and actions column
-                            className="px-4 py-2 md:px-2 md:py-1 font-bold text-xs md:text-[10px] text-gray-600 bg-gray-100"
-                          >
-                            {group}
-                          </td>
-                        </tr>
-                      )}
-                      <tr key={loan.id} className="border-t border-gray-300">
-                        <td className="px-4 py-2 md:px-2 md:py-1">
-                          <input
-                            type="checkbox"
-                            checked={selectedLoans.includes(loan.id)}
-                            onChange={() => handleSelectLoan(loan.id)}
-                          />
-                        </td>
-                        {fields.map((field) => (
-                          <td key={field} className="px-4 py-2 md:px-2 md:py-1 text-xs md:text-[10px] text-gray-600">
-                            {field === "sanctionAmount"
-                              ? `₹ ${loan[field].toLocaleString()}`
-                              : loan[field]}
-                          </td>
-                        ))}
-                        <td className="px-4 py-2 md:px-2 md:py-1 text-xs md:text-[10px] text-gray-600">
-                          {selectedLoans.includes(loan.id) && (
-                            <div className="flex space-x-2 md:space-x-1">
-                              <button
-                                onClick={() => handleUpdateLoan(loan)}
-                                className="text-blue-600 hover:text-blue-800"
-                                title="Update"
-                              >
-                                <svg
-                                  className="w-4 h-4 md:w-3 md:h-3"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0l-1.414-1.414a2 2 0 010-2.828l9.414-9.414z"
-                                  />
-                                </svg>
-                              </button>
-                              <button
-                                onClick={() => handleDeleteLoan(loan.id)}
-                                className="text-red-600 hover:text-red- integral
-800"
-                                title="Delete"
-                              >
-                                <svg
-                                  className="w-4 h-4 md:w-3 md:h-3"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4M3 7h18"
-                                  />
-                                </svg>
-                              </button>
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    </>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td
-                    colSpan={fields.length + 2} // +2 for checkbox and actions column
-                    className="px-4 py-2 md:px-2 md:py-1 text-center text-xs md:text-[10px] text-gray-600"
-                  >
-                    No loans found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+          </div>
+          <h2 className="text-white text-2xl font-bold mt-8 text-center">Welcome Back!</h2>
+          <p className="text-blue-100 mt-2 text-center max-w-md">
+            Streamline your workflow with our powerful dashboard. Login to access all features.
+          </p>
         </div>
 
-        {/* Card View (visible on small screens) */}
-        <div className="block sm:hidden space-y-4 p-4">
-          {paginatedLoans.length > 0 ? (
-            paginatedLoans.map((item, index) => {
-              const { loan, group } = item;
-              const showGroupHeader =
-                group &&
-                (index === 0 || paginatedLoans[index - 1].group !== group);
+        {/* Form Side */}
+        <div className="md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-800">Sign In</h1>
+            <p className="text-gray-600 mt-2">Enter any dummy credentials to access your account</p>
+          </div>
 
-              return (
-                <div key={loan.id}>
-                  {showGroupHeader && (
-                    <div className="font-bold text-xs text-gray-600 bg-gray-100 p-2 rounded mb-2">
-                      {group}
-                    </div>
-                  )}
-                  <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
-                    <div className="flex justify-between items-start">
-                      <div className="space-y-1">
-                        <h3 className="text-sm font-semibold text-gray-900">{loan.loanNo}</h3>
-                        <p className="text-xs text-gray-600">
-                          {loan.borrower} • {loan.loanType}
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          checked={selectedLoans.includes(loan.id)}
-                          onChange={() => handleSelectLoan(loan.id)}
-                        />
-                        {selectedLoans.includes(loan.id) && (
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={() => handleUpdateLoan(loan)}
-                              className="text-blue-600 hover:text-blue-800"
-                              title="Update"
-                            >
-                              <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0l-1.414-1.414a2 2 0 010-2.828l9.414-9.414z"
-                                />
-                              </svg>
-                            </button>
-                            <button
-                              onClick={() => handleDeleteLoan(loan.id)}
-                              className="text-red-600 hover:text-red-800"
-                              title="Delete"
-                            >
-                              <svg
-                                className="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4M3 7h18"
-                                />
-                              </svg>
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    {expandedRows[index] && (
-                      <div className="mt-3 pt-3 border-t border-gray-200 text-xs text-gray-700">
-                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                          <div className="grid grid-cols-1 gap-4">
-                            {fields.map((field) => (
-                              <div key={field}>
-                                <span className="font-semibold text-gray-900">{formatFieldName(field)}:</span>{" "}
-                                {field === "sanctionAmount"
-                                  ? `₹ ${loan[field].toLocaleString()}`
-                                  : loan[field]}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    <button
-                      onClick={() => toggleAccordion(index)}
-                      className="mt-3 flex items-center text-blue-600 hover:text-blue-700 text-xs font-medium transition-colors duration-200 focus:outline-none"
-                      aria-label={expandedRows[index] ? "Hide details" : "Show details"}
-                    >
-                      <FontAwesomeIcon
-                        icon={expandedRows[index] ? faChevronUp : faChevronDown}
-                        className="mr-1"
-                      />
-                      {expandedRows[index] ? "Hide Details" : "Show Details"}
-                    </button>
-                  </div>
-                </div>
-              );
-            })
-          ) : (
-            <div className="text-center text-xs text-gray-600 p-4">
-              No loans found.
+          {error && (
+            <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded">
+              <div className="flex items-center">
+                <svg className="h-5 w-5 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
             </div>
           )}
-          {/* Floating Filter and Add Item Buttons */}
-          <div className="fixed bottom-4 right-4 sm:hidden flex space-x-3">
-            <button
-              onClick={openMobileFilter}
-              className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center"
-              aria-label="Open filters"
-            >
-              <FontAwesomeIcon icon={faFilter} className="mr-2" />
-              Filter
-            </button>
-            <button
-              onClick={() => {
-                setIsUpdateMode(false);
-                setLoanToUpdate(null);
-                setIsModalOpen(true);
-              }}
-              className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center"
-              aria-label="Add item"
-            >
-              <FontAwesomeIcon icon={faPlus} className="mr-2" />
-              Add
-            </button>
-          </div>
-        </div>
-      </div>
 
-      {/* Pagination */}
-      <div className="pb-16 md:pb-0 flex flex-col sm:flex-row sm:justify-between mt-4 space-y-2 sm:space-y-0">
-        <p className="text-xs text-gray-600 text-center sm:text-left">
-          Total {totalItems} row(s). Page {currentPage} of {totalPages}
-        </p>
-        <div className="flex justify-center sm:justify-end space-x-2">
-          <button
-            onClick={handlePreviousPage}
-            disabled={currentPage === 1}
-            className={`px-3 py-1 border border-gray-300 rounded text-xs text-gray-600 ${
-              currentPage === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100"
-            }`}
-          >
-            Previous
-          </button>
-          <button
-            onClick={handleNextPage}
-            disabled={currentPage === totalPages || totalPages === 0}
-            className={`px-3 py-1 border border-gray-300 rounded text-xs text-gray-600 ${
-              currentPage === totalPages || totalPages === 0
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-gray-100"
-            }`}
-          >
-            Next
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile Filter Drawer */}
-      {isMobileFilterOpen && window.innerWidth < 640 && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-center items-end">
-          <div className="bg-white w-full max-h-[90%] rounded-t-lg shadow-lg p-4 overflow-y-auto scrollbar-hidden">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
-              <button
-                onClick={clearAllFilters}
-                className="text-red-500 text-sm font-medium hover:text-red-600"
-              >
-                CLEAR ALL
-              </button>
-            </div>
-            <div className="flex">
-              <div className="w-1/2 pr-2">
-                {fields.map((key) => (
-                  <button
-                    key={key}
-                    onClick={() => handleColumnSelect(key)}
-                    className={`w-full text-left px-4 py-2 mb-2 rounded-md text-sm font-medium ${
-                      selectedColumn === key
-                        ? "bg-blue-100 text-blue-800 border border-blue-300"
-                        : "bg-gray-50 text-gray-700 hover:bg-gray-100"
-                    }`}
-                  >
-                    {formatFieldName(key)}
-                  </button>
-                ))}
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                Email Address
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                  </svg>
+                </div>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  className="pl-10 block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
               </div>
-              <div className="w-1/2 pl-2">
-                {selectedColumn && uniqueValues[selectedColumn] && (
-                  <div className="space-y-2 max-h-60 overflow-y-auto scrollbar-hidden">
-                    {uniqueValues[selectedColumn].map((value) => (
-                      <label
-                        key={value}
-                        className="flex items-center px-2 py-2 hover:bg-gray-100 border-b border-gray-200"
-                      >
-                        <input
-                          type="checkbox"
-                          className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 rounded"
-                          checked={tempFilters[selectedColumn]?.includes(value) || false}
-                          onChange={() => handleTempCheckboxChange(selectedColumn, value)}
-                        />
-                        <span className="text-sm text-gray-700">{value}</span>
-                      </label>
-                    ))}
-                  </div>
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                Password
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  className="pl-10 block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <input
+                  id="remember-me"
+                  name="remember-me"
+                  type="checkbox"
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                />
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                  Remember me
+                </label>
+              </div>
+
+              <div className="text-sm">
+                <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">
+                  Forgot password?
+                </a>
+              </div>
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200 ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
+              >
+                {isLoading ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Signing in...
+                  </>
+                ) : (
+                  'Sign in'
                 )}
+              </button>
+            </div>
+          </form>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Or continue with</span>
               </div>
             </div>
-            <div className="mt-4 flex justify-between items-center border-t border-gray-200 pt-4">
-              <button
-                onClick={closeMobileFilter}
-                className="text-gray-600 text-sm font-medium hover:text-gray-800"
-              >
-                CLOSE
-              </button>
-              <button
-                onClick={applyMobileFilters}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
-              >
-                APPLY
-              </button>
+
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <div>
+                <a
+                  href="#"
+                  className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
+                  </svg>
+                </a>
+              </div>
+
+              <div>
+                <a
+                  href="#"
+                  className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clipRule="evenodd" />
+                  </svg>
+                </a>
+              </div>
             </div>
           </div>
+
+          <div className="mt-8 text-center text-sm text-gray-600">
+            Don't have an account?{' '}
+            <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">
+              Sign up
+            </a>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
-}
+};
 
-export default Portfolio;
+export default Login;
