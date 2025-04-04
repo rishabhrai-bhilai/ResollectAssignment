@@ -427,7 +427,7 @@ function Portfolio() {
         {selectedLoans.length} loans selected
       </div>
 
-      <div className="bg-white md:border bg-blue-50 md:bg-gray-50 md:border-gray-300 md:rounded-lg md:shadow">
+      <div className=" md:border bg-blue-50 md:bg-gray-50 md:border-gray-300 md:rounded-lg md:shadow">
         <div className="hidden sm:block overflow-x-auto">
           <table className="min-w-full bg-blue-50 md:bg-gray-50">
             <thead>
@@ -572,7 +572,7 @@ function Portfolio() {
           </table>
         </div>
 
-        <div className="block sm:hidden space-y-4">
+        <div className="block bg-blue-50 sm:hidden space-y-4">
           {paginatedLoans.length > 0 ? (
             paginatedLoans.map((item, index) => {
               const { loan, group } = item;
