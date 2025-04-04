@@ -27,7 +27,7 @@ function App() {
                   <Header />
                   <div className="flex flex-1 relative">
                     <Sidebar />
-                    <div className="flex-1 w-full mt-0 md:ml-64 md:mt-16 overflow-auto">
+                    <div className="flex-1 w-full bg-blue-50 md:bg-gray-50 mt-0 pt-4 md:ml-64 md:mt-16 overflow-auto">
                       <Routes>
                         <Route path="/" element={<Portfolio />} />
                         <Route path="/notifications" element={<Notifications />} />

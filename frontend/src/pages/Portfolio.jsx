@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { getLoans, addLoan, updateLoan, deleteLoan } from "../data.js";
 import AddLoanModal from "../components/AddLoanModal";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFilter, faPlus, faMinus, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
+import { faFilter, faPlus, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 
 function Portfolio() {
   const [loans, setLoans] = useState([]);
@@ -12,19 +12,19 @@ function Portfolio() {
   const [groupBy, setGroupBy] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedLoans, setSelectedLoans] = useState([]); // Track selected loans
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: null }); // Track sorting state
-  const [fields, setFields] = useState([]); // Track dynamic fields from dataset
-  const [currentPage, setCurrentPage] = useState(1); // Track current page
-  const [isModalOpen, setIsModalOpen] = useState(false); // Track modal state
-  const [isUpdateMode, setIsUpdateMode] = useState(false); // Track if modal is in update mode
-  const [loanToUpdate, setLoanToUpdate] = useState(null); // Track the loan to update
-  const [expandedRows, setExpandedRows] = useState({}); // Track expanded rows for mobile view
-  const [columnFilters, setColumnFilters] = useState({}); // Track column filters
-  const [tempFilters, setTempFilters] = useState({}); // Temporary filters for mobile drawer
-  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false); // Track mobile filter drawer
-  const [selectedColumn, setSelectedColumn] = useState(null); // Track selected column in mobile filter
-  const itemsPerPage = 10; // Number of items per page
+  const [selectedLoans, setSelectedLoans] = useState([]);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
+  const [fields, setFields] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isUpdateMode, setIsUpdateMode] = useState(false);
+  const [loanToUpdate, setLoanToUpdate] = useState(null);
+  const [expandedRows, setExpandedRows] = useState({});
+  const [columnFilters, setColumnFilters] = useState({});
+  const [tempFilters, setTempFilters] = useState({});
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  const [selectedColumn, setSelectedColumn] = useState(null);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     setLoading(true);
@@ -33,7 +33,6 @@ function Portfolio() {
       setLoans(fetchedLoans);
       setFilteredLoans(fetchedLoans);
 
-      // Dynamically determine fields from the first loan object (excluding 'id')
       if (fetchedLoans.length > 0) {
         const loanFields = Object.keys(fetchedLoans[0]).filter((key) => key !== "id");
         setFields(loanFields);
@@ -46,7 +45,6 @@ function Portfolio() {
     }
   }, []);
 
-  // Compute unique values for each column for filtering
   const uniqueValues = useMemo(() => {
     const values = {};
     loans.forEach((item) => {
@@ -58,7 +56,6 @@ function Portfolio() {
     return Object.fromEntries(Object.entries(values).map(([key, set]) => [key, [...set]]));
   }, [loans, fields]);
 
-  // Apply column filters
   const filteredData = useMemo(() => {
     let data = loans.filter((row) =>
       fields.some((field) =>
@@ -66,7 +63,6 @@ function Portfolio() {
       )
     );
 
-    // Apply column filters
     data = data.filter((row) =>
       Object.entries(columnFilters).every(([key, selectedValues]) => {
         if (!selectedValues || selectedValues.length === 0) return true;
@@ -74,12 +70,10 @@ function Portfolio() {
       })
     );
 
-    // Apply tab filter (if any)
     if (selectedTab !== "ALL") {
       // Add custom filtering logic if needed
     }
 
-    // Apply group by
     if (groupBy) {
       const grouped = data.reduce((acc, loan) => {
         const key = loan[groupBy];
@@ -90,7 +84,6 @@ function Portfolio() {
       return grouped;
     }
 
-    // Apply sorting
     if (sortConfig.key) {
       data.sort((a, b) => {
         if (a[sortConfig.key] < b[sortConfig.key])
@@ -106,18 +99,18 @@ function Portfolio() {
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to first page on search
+    setCurrentPage(1);
   };
 
   const handleTabChange = (tab) => {
     setSelectedTab(tab);
-    setCurrentPage(1); // Reset to first page on tab change
+    setCurrentPage(1);
   };
 
   const handleGroupBy = (e) => {
     const value = e.target.value;
     setGroupBy(value);
-    setCurrentPage(1); // Reset to first page on group change
+    setCurrentPage(1);
   };
 
   const handleSelectLoan = (loanId) => {
@@ -130,7 +123,7 @@ function Portfolio() {
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
-      const allLoanIds = paginatedLoans.map((item) => item.loan.id); // Only select loans on the current page
+      const allLoanIds = paginatedLoans.map((item) => item.loan.id);
       setSelectedLoans(allLoanIds);
     } else {
       setSelectedLoans([]);
@@ -143,10 +136,9 @@ function Portfolio() {
       direction = "descending";
     }
     setSortConfig({ key, direction });
-    setCurrentPage(1); // Reset to first page on sort
+    setCurrentPage(1);
   };
 
-  // Format field names for display (e.g., "loanNo" -> "Loan No")
   const formatFieldName = (field) => {
     return field
       .replace(/([A-Z])/g, " $1")
@@ -154,38 +146,34 @@ function Portfolio() {
       .trim();
   };
 
-  // Handle adding a new loan
   const handleAddLoan = (newLoan) => {
     if (isUpdateMode) {
-      updateLoan(loanToUpdate.id, newLoan); // Update the loan in data.js
+      updateLoan(loanToUpdate.id, newLoan);
     } else {
-      addLoan(newLoan); // Add to data.js
+      addLoan(newLoan);
     }
-    const updatedLoans = getLoans(); // Fetch updated loans
+    const updatedLoans = getLoans();
     setLoans(updatedLoans);
     setFilteredLoans(updatedLoans);
-    setIsModalOpen(false); // Close modal
-    setIsUpdateMode(false); // Reset update mode
-    setLoanToUpdate(null); // Clear loan to update
+    setIsModalOpen(false);
+    setIsUpdateMode(false);
+    setLoanToUpdate(null);
   };
 
-  // Handle deleting a loan
   const handleDeleteLoan = (loanId) => {
-    deleteLoan(loanId); // Delete from data.js
-    const updatedLoans = getLoans(); // Fetch updated loans
+    deleteLoan(loanId);
+    const updatedLoans = getLoans();
     setLoans(updatedLoans);
     setFilteredLoans(updatedLoans);
-    setSelectedLoans((prev) => prev.filter((id) => id !== loanId)); // Remove from selected loans
+    setSelectedLoans((prev) => prev.filter((id) => id !== loanId));
   };
 
-  // Handle updating a loan
   const handleUpdateLoan = (loan) => {
     setIsUpdateMode(true);
     setLoanToUpdate(loan);
     setIsModalOpen(true);
   };
 
-  // Toggle accordion for mobile view
   const toggleAccordion = (rowId) => {
     setExpandedRows((prev) => ({
       ...prev,
@@ -193,7 +181,6 @@ function Portfolio() {
     }));
   };
 
-  // Handle column filter checkbox changes
   const handleCheckboxChange = (column, value) => {
     setColumnFilters((prev) => {
       const newFilters = { ...prev };
@@ -229,7 +216,7 @@ function Portfolio() {
   const openMobileFilter = () => {
     setIsMobileFilterOpen(true);
     setTempFilters({ ...columnFilters });
-    setSelectedColumn(null);
+    setSelectedColumn(null); // Fixed typo here
   };
 
   const closeMobileFilter = () => {
@@ -248,7 +235,6 @@ function Portfolio() {
     setSelectedColumn(column === selectedColumn ? null : column);
   };
 
-  // Flatten grouped data for pagination while preserving group information
   const flattenGroupedData = () => {
     if (Array.isArray(filteredData)) {
       return filteredData.map((loan) => ({ loan, group: null }));
@@ -263,19 +249,16 @@ function Portfolio() {
     return flattened;
   };
 
-  // Pagination Logic
   const flattenedLoans = flattenGroupedData();
   const totalItems = flattenedLoans.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-  // Ensure currentPage is within valid bounds
   useEffect(() => {
     if (currentPage > totalPages && totalPages > 0) {
       setCurrentPage(totalPages);
     }
   }, [totalPages, currentPage]);
 
-  // Get the loans for the current page
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedLoans = flattenedLoans.slice(startIndex, endIndex);
@@ -283,14 +266,14 @@ function Portfolio() {
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
-      setSelectedLoans([]); // Clear selection when changing pages
+      setSelectedLoans([]);
     }
   };
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
-      setSelectedLoans([]); // Clear selection when changing pages
+      setSelectedLoans([]);
     }
   };
 
@@ -327,15 +310,17 @@ function Portfolio() {
     <div className="px-4 py-1 pt-16 md:pt-4">
       <div className="flex justify-between items-center mb-2">
         <h1 className="text-xl sm:text-2xl font-bold">PORTFOLIO</h1>
-        <button
-          onClick={clearAllFilters}
-          className="hidden sm:block lg:hidden text-red-500 text-sm font-medium hover:text-red-600 transition-colors"
-        >
-          Clear All
-        </button>
+        <div className="flex items-center space-x-2">
+          
+          <button
+            onClick={clearAllFilters}
+            className=" sm:block  text-red-500 text-sm font-medium hover:text-red-600 transition-colors"
+          >
+            Clear Filter
+          </button>
+        </div>
       </div>
 
-      {/* Tabs for filtering loans */}
       <div className="hidden md:block flex space-x-2 mb-4 overflow-x-auto">
         {[
           "ALL",
@@ -361,20 +346,19 @@ function Portfolio() {
         ))}
       </div>
 
-      {/* Search and Filter Inputs */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 space-y-2 sm:space-y-0 sm:space-x-2">
         <input
           type="text"
           placeholder="Search Loans"
           value={searchTerm}
           onChange={handleSearch}
-          className="border border-gray-300 rounded px-3 py-1 text-xs sm:text-sm w-full sm:w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-blue-200 rounded px-3 py-4 md:py-1 text-xs sm:text-sm w-full sm:w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
           <select
             value={groupBy}
             onChange={handleGroupBy}
-            className="border border-gray-300 rounded px-3 py-1 text-xs sm:text-sm text-gray-600 focus:outline-none w-full sm:w-auto"
+            className=" sm:block border border-blue-200 rounded px-3 py-4 md:py-1 text-xs sm:text-sm text-gray-600 focus:outline-none w-full sm:w-auto"
           >
             <option value="">Group By...</option>
             {fields.map((field) => (
@@ -427,7 +411,6 @@ function Portfolio() {
         </div>
       </div>
 
-      {/* Add/Update Loan Modal */}
       <AddLoanModal
         isOpen={isModalOpen}
         onClose={() => {
@@ -440,16 +423,11 @@ function Portfolio() {
         initialData={loanToUpdate}
       />
 
-      {/* Loans Selected */}
       <div className="hidden md:block text-xs sm:text-sm text-gray-600 mb-3 bg-white border border-gray-300 rounded-lg px-3 py-1.5 sm:px-4 sm:py-2">
         {selectedLoans.length} loans selected
       </div>
 
-      {/* Table for larger screens, Cards for smaller screens */}
-      <div className="bg-white md:border md:border-gray-300 md:rounded-lg md:shadow">
-
-
-        {/* Table View (hidden on small screens) */}
+      <div className="bg-white md:border bg-blue-50 md:bg-gray-50 md:border-gray-300 md:rounded-lg md:shadow">
         <div className="hidden sm:block overflow-x-auto">
           <table className="min-w-full">
             <thead>
@@ -508,7 +486,7 @@ function Portfolio() {
                       {showGroupHeader && (
                         <tr key={`group-${group}`}>
                           <td
-                            colSpan={fields.length + 2} // +2 for checkbox and actions column
+                            colSpan={fields.length + 2}
                             className="px-4 py-2 md:px-2 md:py-1 font-bold text-xs md:text-[10px] text-gray-600 bg-gray-100"
                           >
                             {group}
@@ -583,7 +561,7 @@ function Portfolio() {
               ) : (
                 <tr>
                   <td
-                    colSpan={fields.length + 2} // +2 for checkbox and actions column
+                    colSpan={fields.length + 2}
                     className="px-4 py-2 md:px-2 md:py-1 text-center text-xs md:text-[10px] text-gray-600"
                   >
                     No loans found.
@@ -594,167 +572,168 @@ function Portfolio() {
           </table>
         </div>
 
-        {/* Card View (visible on small screens) */}
-        {/* Card View (visible on small screens) */}
-<div className="block sm:hidden space-y-4">
-  {paginatedLoans.length > 0 ? (
-    paginatedLoans.map((item, index) => {
-      const { loan, group } = item;
-      const showGroupHeader =
-        group &&
-        (index === 0 || paginatedLoans[index - 1].group !== group);
+        <div className="block sm:hidden space-y-4">
+          {paginatedLoans.length > 0 ? (
+            paginatedLoans.map((item, index) => {
+              const { loan, group } = item;
+              const showGroupHeader =
+                group &&
+                (index === 0 || paginatedLoans[index - 1].group !== group);
 
-      // Define badge colors based on loanType
-      const getBadgeColor = (loanType) => {
-        switch (loanType.toLowerCase()) {
-          case "personal":
-            return "bg-green-100 text-green-800";
-          case "home":
-            return "bg-blue-100 text-blue-800";
-          case "auto":
-            return "bg-purple-100 text-purple-800";
-          default:
-            return "bg-gray-100 text-gray-800";
-        }
-      };
+              const getBadgeColor = (loanType) => {
+                switch (loanType.toLowerCase()) {
+                  case "home loan":
+                    return "bg-blue-100 text-blue-800";
+                  case "car loan":
+                    return "bg-purple-100 text-purple-800";
+                  case "personal loan":
+                    return "bg-green-100 text-green-800";
+                  case "education loan":
+                    return "bg-yellow-100 text-yellow-800";
+                  case "business loan":
+                    return "bg-red-100 text-red-800";
+                  case "mortgage loan":
+                    return "bg-indigo-100 text-indigo-800";
+                  default:
+                    return "bg-gray-100 text-gray-800";
+                }
+              };
 
-      return (
-        <div key={loan.id}>
-          {showGroupHeader && (
-            <div className="font-bold text-xs text-gray-600 bg-gray-100 p-2 rounded mb-2">
-              {group}
+              return (
+                <div key={loan.id}>
+                  {showGroupHeader && (
+                    <div className="font-bold text-xs text-gray-600 bg-gray-100 p-2 rounded mb-2">
+                      {group}
+                    </div>
+                  )}
+                  <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-semibold text-gray-900">{loan.loanNo}</h3>
+                        <div className="flex items-center space-x-2">
+                          <p className="text-xs text-gray-600">{loan.borrower}</p>
+                          <span
+                            className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full ${getBadgeColor(
+                              loan.loanType
+                            )}`}
+                          >
+                            {loan.loanType}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedLoans.includes(loan.id)}
+                          onChange={() => handleSelectLoan(loan.id)}
+                        />
+                        {selectedLoans.includes(loan.id) && (
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => handleUpdateLoan(loan)}
+                              className="text-blue-600 hover:text-blue-800"
+                              title="Update"
+                            >
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0l-1.414-1.414a2 2 0 010-2.828l9.414-9.414z"
+                                />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => handleDeleteLoan(loan.id)}
+                              className="text-red-600 hover:text-red-800"
+                              title="Delete"
+                            >
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4M3 7h18"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {expandedRows[index] && (
+                      <div className="mt-3 pt-3 border-t border-gray-200 text-xs text-gray-700">
+                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                          <div className="grid grid-cols-1 gap-4">
+                            {fields.map((field) => (
+                              <div key={field}>
+                                <span className="font-semibold text-gray-900">{formatFieldName(field)}:</span>{" "}
+                                {field === "sanctionAmount"
+                                  ? `₹ ${loan[field].toLocaleString()}`
+                                  : loan[field]}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    <button
+                      onClick={() => toggleAccordion(index)}
+                      className="mt-3 flex items-center text-blue-600 hover:text-blue-700 text-xs font-medium transition-colors duration-200 focus:outline-none"
+                      aria-label={expandedRows[index] ? "Hide details" : "Show details"}
+                    >
+                      <FontAwesomeIcon
+                        icon={expandedRows[index] ? faChevronUp : faChevronDown}
+                        className="mr-1"
+                      />
+                      {expandedRows[index] ? "Hide Details" : "Show Details"}
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="text-center text-xs text-gray-600 p-4">
+              No loans found.
             </div>
           )}
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
-            <div className="flex justify-between items-start">
-              <div className="space-y-1">
-                <h3 className="text-sm font-semibold text-gray-900">{loan.loanNo}</h3>
-                <div className="flex items-center space-x-2">
-                  <p className="text-xs text-gray-600">{loan.borrower}</p>
-                  <span
-                    className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full ${getBadgeColor(
-                      loan.loanType
-                    )}`}
-                  >
-                    {loan.loanType}
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={selectedLoans.includes(loan.id)}
-                  onChange={() => handleSelectLoan(loan.id)}
-                />
-                {selectedLoans.includes(loan.id) && (
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => handleUpdateLoan(loan)}
-                      className="text-blue-600 hover:text-blue-800"
-                      title="Update"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0l-1.414-1.414a2 2 0 010-2.828l9.414-9.414z"
-                        />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => handleDeleteLoan(loan.id)}
-                      className="text-red-600 hover:text-red-800"
-                      title="Delete"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4M3 7h18"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-            {expandedRows[index] && (
-              <div className="mt-3 pt-3 border-t border-gray-200 text-xs text-gray-700">
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <div className="grid grid-cols-1 gap-4">
-                    {fields.map((field) => (
-                      <div key={field}>
-                        <span className="font-semibold text-gray-900">{formatFieldName(field)}:</span>{" "}
-                        {field === "sanctionAmount"
-                          ? `₹ ${loan[field].toLocaleString()}`
-                          : loan[field]}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
+          <div className="fixed bottom-4 right-4 sm:hidden flex space-x-3">
             <button
-              onClick={() => toggleAccordion(index)}
-              className="mt-3 flex items-center text-blue-600 hover:text-blue-700 text-xs font-medium transition-colors duration-200 focus:outline-none"
-              aria-label={expandedRows[index] ? "Hide details" : "Show details"}
+              onClick={openMobileFilter}
+              className="bg-violet-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center"
+              aria-label="Open filters"
             >
-              <FontAwesomeIcon
-                icon={expandedRows[index] ? faChevronUp : faChevronDown}
-                className="mr-1"
-              />
-              {expandedRows[index] ? "Hide Details" : "Show Details"}
+              <FontAwesomeIcon icon={faFilter} className="mr-2" />
+              Filter
+            </button>
+            <button
+              onClick={() => {
+                setIsUpdateMode(false);
+                setLoanToUpdate(null);
+                setIsModalOpen(true);
+              }}
+              className="bg-violet-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center"
+              aria-label="Add item"
+            >
+              <FontAwesomeIcon icon={faPlus} className="mr-2" />
+              Add
             </button>
           </div>
         </div>
-      );
-    })
-  ) : (
-    <div className="text-center text-xs text-gray-600 p-4">
-      No loans found.
-    </div>
-  )}
-  {/* Floating Filter and Add Item Buttons */}
-  <div className="fixed bottom-4 right-4 sm:hidden flex space-x-3">
-    <button
-      onClick={openMobileFilter}
-      className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center"
-      aria-label="Open filters"
-    >
-      <FontAwesomeIcon icon={faFilter} className="mr-2" />
-      Filter
-    </button>
-    <button
-      onClick={() => {
-        setIsUpdateMode(false);
-        setLoanToUpdate(null);
-        setIsModalOpen(true);
-      }}
-      className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center"
-      aria-label="Add item"
-    >
-      <FontAwesomeIcon icon={faPlus} className="mr-2" />
-      Add
-    </button>
-  </div>
-</div>
       </div>
 
-      {/* Pagination */}
       <div className="pb-16 md:pb-0 flex flex-col sm:flex-row sm:justify-between mt-4 space-y-2 sm:space-y-0">
         <p className="text-xs text-gray-600 text-center sm:text-left">
           Total {totalItems} row(s). Page {currentPage} of {totalPages}
@@ -783,7 +762,6 @@ function Portfolio() {
         </div>
       </div>
 
-      {/* Mobile Filter Drawer */}
       {isMobileFilterOpen && window.innerWidth < 640 && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-center items-end">
           <div className="bg-white w-full max-h-[90%] rounded-t-lg shadow-lg p-4 overflow-y-auto scrollbar-hidden">

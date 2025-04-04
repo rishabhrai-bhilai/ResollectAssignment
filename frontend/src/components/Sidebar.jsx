@@ -14,10 +14,9 @@ import LogoutButton from "./LogoutButton";
 
 function Sidebar() {
   const location = useLocation();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // For mobile sidebar toggle
-  const [isClosed, setIsClosed] = useState(false); // For larger screen sidebar toggle
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isClosed, setIsClosed] = useState(false);
 
-  // Static variable for sidebar links
   const sidebarLinks = [
     { text: "Portfolio", route: "/", icon: "HomeIcon" },
     { text: "Notifications", route: "/notifications", icon: "BellIcon" },
@@ -29,7 +28,6 @@ function Sidebar() {
     { text: "Permissions", route: "/permissions", icon: "LockClosedIcon" },
   ];
 
-  // Mapping of icon names to their respective components
   const iconMap = {
     HomeIcon,
     BellIcon,
@@ -66,28 +64,29 @@ function Sidebar() {
 
   return (
     <>
-      {/* Hamburger Menu Button (Visible only on mobile) */}
+      {/* Hamburger Menu Button (Mobile only) */}
       <nav className="md:hidden fixed top-4 right-4 z-50">
         <button
           onClick={toggleMobileSidebar}
-          className="text-gray-700 focus:outline-none"
+          className="text-gray-700 focus:outline-none  p-2 rounded-md shadow-md"
         >
           <i className={`bx ${isSidebarOpen ? "bx-x" : "bx-menu"} text-3xl`}></i>
         </button>
       </nav>
 
-      {/* Sidebar */}
+      {/* Sidebar - Now with solid white background */}
       <aside
-        className={`fixed top-0 left-0 h-screen bg-white border-r border-gray-200 flex flex-col transform transition-transform duration-200 ease-in-out z-40
-          ${isSidebarOpen ? "translate-x-0 w-3/4" : "-translate-x-full w-0"}
-          md:translate-x-0 md:w-64 md:p-2
-          ${isClosed ? "md:w-[88px] md:px-2.5" : "md:w-64 md:px-3.5"}`} // Tailwind classes for width and padding
+        className={`fixed top-0 left-0 h-screen bg-white border-r border-gray-200 flex flex-col z-40 shadow-lg
+          ${isSidebarOpen ? "translate-x-0 w-64" : "-translate-x-full"}
+          md:translate-x-0 md:w-64
+          ${isClosed ? "md:w-20" : "md:w-64"}
+          transition-all duration-200 ease-in-out`}
       >
         {/* Header with Logo */}
-        <header className="relative md:hidden">
-          <div className="flex items-center w-full px-3 mt-3">
+        <header className="relative">
+          <div className="flex items-center w-full px-4 pt-4 mt-4 pb-3">
             <svg
-              className="w-8 h-8 fill-current flex-shrink-0"
+              className="w-8 h-8 fill-current flex-shrink-0 text-blue-600"
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 20 20"
               fill="currentColor"
@@ -95,71 +94,75 @@ function Sidebar() {
               <path d="M11 17a1 1 0 001.447.894l4-2A1 1 0 0017 15V9.236a1 1 0 00-1.447-.894l-4 2a1 1 0 00-.553.894V17zM15.211 6.276a1 1 0 000-1.788l-4.764-2.382a1 1 0 00-.894 0L4.789 4.488a1 1 0 000 1.788l4.764 2.382a1 1 0 00.894 0l4.764-2.382zM4.447 8.342A1 1 0 003 9.236V15a1 1 0 00.553.894l4 2A1 1 0 009 17v-5.764a1 1 0 00-.553-.894l-4-2z" />
             </svg>
             <span
-              className={`ml-2 text-sm font-bold transition-opacity duration-200 ${
-                isClosed ? "opacity-100" : "opacity-100"
-              } md:opacity-100`} // Tailwind for text and opacity
+              className={`ml-2 text-lg font-bold text-gray-800 ${
+                isClosed ? "hidden" : "block"
+              }`}
             >
               resollect
             </span>
           </div>
-          <i
-            className="bx bx-chevron-right hidden md:block absolute top-1/2 -right-[25px] transform -translate-y-1/2 rotate-180 w-[25px] h-[25px] bg-blue-600 text-white flex items-center justify-center rounded-full text-base cursor-pointer"
+          <button
             onClick={toggleSidebar}
-            style={{
-              transform: isClosed ? "translateY(-50%)" : "translateY(-50%) rotate(180deg)",
-            }}
-          ></i>
+            className="hidden md:flex absolute top-6 -right-3 w-6 h-6 bg-blue-600 text-white rounded-full items-center justify-center shadow-md"
+          >
+            <i
+              className={`bx bx-chevron-left text-lg ${
+                isClosed ? "rotate-180" : ""
+              }`}
+            ></i>
+          </button>
         </header>
 
-        {/* Menu Bar */}
-        <div className="flex-1 overflow-y-auto mt-16">
-          <div className="menu">
-            <ul className="menu-links">
-              {sidebarLinks.map((link) => {
-                const IconComponent = iconMap[link.icon];
-                return (
-                  <li key={link.route} className="h-[45px] mt-[12px] text-gray-700 rounded-md hover:bg-blue-500 hover:text-white flex items-center">
-                    <Link
-                      to={link.route}
-                      className={`flex items-center w-full h-full rounded  transition-all duration-400 ease-in-out`} // Tailwind for link styling
-                      onClick={() => {
-                        if (isSidebarOpen) setIsSidebarOpen(false);
-                      }}
+        {/* Menu Items */}
+        <div className="flex-1 overflow-y-auto py-4 mt-4 px-2">
+          <ul className="space-y-1">
+            {sidebarLinks.map((link) => {
+              const IconComponent = iconMap[link.icon];
+              return (
+                <li key={link.route}>
+                  <Link
+                    to={link.route}
+                    className={`flex items-center p-3 rounded-lg transition-colors duration-200 ${
+                      location.pathname === link.route
+                        ? "bg-blue-100 text-blue-600"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                    onClick={() => setIsSidebarOpen(false)}
+                  >
+                    <IconComponent className="w-6 h-6 min-w-[24px]" />
+                    <span
+                      className={`ml-3 font-medium ${
+                        isClosed ? "hidden" : "block"
+                      }`}
                     >
-                      <IconComponent className="w-5 h-5 min-w-[60px] flex items-center justify-center" />
-                      <span
-                        className={`text-base font-medium  whitespace-nowrap transition-opacity duration-300 ease-in-out ${
-                          isClosed ? "opacity-100" : "opacity-100"
-                        } md:opacity-100 `} // Tailwind for text
-                      >
-                        {link.text}
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
+                      {link.text}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
 
-          <div className="bottom-content  text-gray-700 hover:bg-blue-500 hover:text-white mt-auto">
-            <li className="h-[50px] mt-[15px] flex items-center">
-              <LogoutButton onClick={() => setIsSidebarOpen(false)} />
-            </li>
-          </div>
+        {/* Logout Button */}
+        <div className="p-4 ">
+          <LogoutButton className="w-full" />
         </div>
 
         {/* Footer */}
-        <div className=" hidden md:flex px-4 py-4 border-t border-gray-200 flex justify-center items-center">
+        <div className={`p-4 border-t border-gray-200 text-center ${
+          isClosed ? "hidden" : "block"
+        }`}>
           <p className="text-xs text-gray-500">
             Powered by{" "}
-            <span className="text-esollect-blue text-lg">
-              <span className="rounded-2xl px-2 text-white bg-blue-900 mx-1">r</span>esollect
+            <span className="text-blue-800 font-medium">
+              resollect
             </span>
           </p>
         </div>
       </aside>
 
-      {/* Overlay for Mobile (when sidebar is open) */}
+      {/* Overlay for Mobile */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
