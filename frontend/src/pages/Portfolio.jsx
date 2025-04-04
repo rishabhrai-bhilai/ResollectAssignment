@@ -324,7 +324,7 @@ function Portfolio() {
   }
 
   return (
-    <div className="px-4 py-1 pt-16 md:pt-4 ">
+    <div className="px-4 py-1 pt-16 md:pt-4">
       <div className="flex justify-between items-center mb-2">
         <h1 className="text-xl sm:text-2xl font-bold">PORTFOLIO</h1>
         <button
@@ -336,7 +336,7 @@ function Portfolio() {
       </div>
 
       {/* Tabs for filtering loans */}
-      <div className=" hidden md:block flex space-x-2 mb-4 overflow-x-auto">
+      <div className="hidden md:block flex space-x-2 mb-4 overflow-x-auto">
         {[
           "ALL",
           "Pre Sarfaesi",
@@ -383,7 +383,7 @@ function Portfolio() {
               </option>
             ))}
           </select>
-          <button className="hidden md:flex bg-blue-600 text-white px-3 py-1 rounded text-xs sm:text-sm font-medium flex items-center justify-center w-full sm:w-auto">
+          <button className="hidden md:flex bg-blue-600 text-white px-3 py-1 rounded text-xs sm:text-sm font-medium items-center justify-center w-full sm:w-auto">
             <svg
               className="w-3 h-3 sm:w-4 sm:h-4 mr-1"
               fill="none"
@@ -406,7 +406,7 @@ function Portfolio() {
               setLoanToUpdate(null);
               setIsModalOpen(true);
             }}
-            className="hidden md:flex bg-blue-600 text-white px-3 py-1 rounded text-xs sm:text-sm font-medium flex items-center justify-center w-full sm:w-auto"
+            className="hidden md:flex bg-blue-600 text-white px-3 py-1 rounded text-xs sm:text-sm font-medium items-center justify-center w-full sm:w-auto"
           >
             <svg
               className="w-3 h-3 sm:w-4 sm:h-4 mr-1"
@@ -448,11 +448,11 @@ function Portfolio() {
       {/* Table for larger screens, Cards for smaller screens */}
       <div className="bg-white border border-gray-300 rounded-lg shadow">
         {/* Table View (hidden on small screens) */}
-        <div className="hidden sm:block">
+        <div className="hidden sm:block overflow-x-auto">
           <table className="min-w-full">
             <thead>
               <tr>
-                <th className="px-4 py-2 text-left border-b border-gray-300 text-xs text-gray-600">
+                <th className="px-4 py-2 md:px-2 md:py-1 text-left border-b border-gray-300 text-xs md:text-[10px] text-gray-600">
                   <input
                     type="checkbox"
                     onChange={handleSelectAll}
@@ -465,7 +465,7 @@ function Portfolio() {
                 {fields.map((field) => (
                   <th
                     key={field}
-                    className="px-4 py-2 text-left border-b border-gray-300 text-xs text-gray-600"
+                    className="px-4 py-2 md:px-2 md:py-1 text-left border-b border-gray-300 text-xs md:text-[10px] text-gray-600"
                   >
                     <div className="flex items-center">
                       {formatFieldName(field)}
@@ -476,7 +476,7 @@ function Portfolio() {
                           viewBox="0 0 24 24"
                           strokeWidth={1.5}
                           stroke="currentColor"
-                          className="size-4 text-gray-600"
+                          className="size-4 md:size-3 text-gray-600"
                         >
                           <path
                             strokeLinecap="round"
@@ -488,7 +488,7 @@ function Portfolio() {
                     </div>
                   </th>
                 ))}
-                <th className="px-4 py-2 text-left border-b border-gray-300 text-xs text-gray-600">
+                <th className="px-4 py-2 md:px-2 md:py-1 text-left border-b border-gray-300 text-xs md:text-[10px] text-gray-600">
                   Actions
                 </th>
               </tr>
@@ -507,14 +507,14 @@ function Portfolio() {
                         <tr key={`group-${group}`}>
                           <td
                             colSpan={fields.length + 2} // +2 for checkbox and actions column
-                            className="px-4 py-2 font-bold text-xs text-gray-600 bg-gray-100"
+                            className="px-4 py-2 md:px-2 md:py-1 font-bold text-xs md:text-[10px] text-gray-600 bg-gray-100"
                           >
                             {group}
                           </td>
                         </tr>
                       )}
                       <tr key={loan.id} className="border-t border-gray-300">
-                        <td className="px-4 py-2">
+                        <td className="px-4 py-2 md:px-2 md:py-1">
                           <input
                             type="checkbox"
                             checked={selectedLoans.includes(loan.id)}
@@ -522,22 +522,22 @@ function Portfolio() {
                           />
                         </td>
                         {fields.map((field) => (
-                          <td key={field} className="px-4 py-2 text-xs text-gray-600">
+                          <td key={field} className="px-4 py-2 md:px-2 md:py-1 text-xs md:text-[10px] text-gray-600">
                             {field === "sanctionAmount"
                               ? `₹ ${loan[field].toLocaleString()}`
                               : loan[field]}
                           </td>
                         ))}
-                        <td className="px-4 py-2 text-xs text-gray-600">
+                        <td className="px-4 py-2 md:px-2 md:py-1 text-xs md:text-[10px] text-gray-600">
                           {selectedLoans.includes(loan.id) && (
-                            <div className="flex space-x-2">
+                            <div className="flex space-x-2 md:space-x-1">
                               <button
                                 onClick={() => handleUpdateLoan(loan)}
                                 className="text-blue-600 hover:text-blue-800"
                                 title="Update"
                               >
                                 <svg
-                                  className="w-4 h-4"
+                                  className="w-4 h-4 md:w-3 md:h-3"
                                   fill="none"
                                   stroke="currentColor"
                                   viewBox="0 0 24 24"
@@ -557,7 +557,7 @@ function Portfolio() {
                                 title="Delete"
                               >
                                 <svg
-                                  className="w-4 h-4"
+                                  className="w-4 h-4 md:w-3 md:h-3"
                                   fill="none"
                                   stroke="currentColor"
                                   viewBox="0 0 24 24"
@@ -582,7 +582,7 @@ function Portfolio() {
                 <tr>
                   <td
                     colSpan={fields.length + 2} // +2 for checkbox and actions column
-                    className="px-4 py-2 text-center text-xs text-gray-600"
+                    className="px-4 py-2 md:px-2 md:py-1 text-center text-xs md:text-[10px] text-gray-600"
                   >
                     No loans found.
                   </td>
@@ -731,7 +731,7 @@ function Portfolio() {
       </div>
 
       {/* Pagination */}
-      <div className=" pb-16 md:pb-0 flex flex-col sm:flex-row sm:justify-between mt-4 space-y-2 sm:space-y-0">
+      <div className="pb-16 md:pb-0 flex flex-col sm:flex-row sm:justify-between mt-4 space-y-2 sm:space-y-0">
         <p className="text-xs text-gray-600 text-center sm:text-left">
           Total {totalItems} row(s). Page {currentPage} of {totalPages}
         </p>
