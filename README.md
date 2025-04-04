@@ -168,8 +168,8 @@ The application is fully mobile-responsive:
 
 ## Links
 
-- **GitHub Repository**: [https://github.com/your-username/loan-portfolio](https://github.com/rishabhrai-bhilai/ResollectAssignment)
-- **Live Deployed Link (Frontend)**: [https://loan-portfolio.netlify.app](https://resollectdashboard.netlify.app/)
+- **GitHub Repository**: [https://github.com/rishabh](https://github.com/rishabhrai-bhilai/ResollectAssignment)
+- **Live Deployed Link (Frontend)**: [https://resollect](https://resollectdashboard.netlify.app/)
 - **Documentation**: [documentation.md](documentation.md)
 
 ---
