@@ -168,8 +168,8 @@ The application is fully mobile-responsive:
 
 ## Links
 
-- **GitHub Repository**: [https://github.com/rishabh](https://github.com/rishabhrai-bhilai/ResollectAssignment)
-- **Live Deployed Link (Frontend)**: [https://resollect](https://resollectdashboard.netlify.app/)
+- **GitHub Repository**: [https://github.com/rishabhrai-bhilai/](https://github.com/rishabhrai-bhilai/ResollectAssignment)
+- **Live Deployed Link (Frontend)**: [https://resollect.com](https://resollectdashboard.netlify.app/)
 - **Documentation**: [documentation.md](documentation.md)
 
 ---
