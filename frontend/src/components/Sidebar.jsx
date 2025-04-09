@@ -1,22 +1,22 @@
-// src/components/Sidebar.jsx
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { HomeIcon, BellIcon, EnvelopeIcon, ShoppingBagIcon, CloudArrowUpIcon, CogIcon, UserGroupIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 import LogoutButton from "./LogoutButton";
+import { useTheme } from '../context/ThemeContext';
 
 function Sidebar() {
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isClosed, setIsClosed] = useState(false);
-
+  const { theme, toggleTheme } = useTheme();
 
   const sidebarLinks = [
     { text: "Portfolio", route: "/", icon: "HomeIcon" },
     { text: "Notifications", route: "/notifications", icon: "BellIcon" },
     { text: "Notices", route: "/notices", icon: "EnvelopeIcon" },
-    { text: "Auction", route: "/auction", icon: "ShoppingBagIcon" },
-    { text: "Data Upload", route: "/data-upload", icon: "CloudArrowUpIcon" },
-    { text: "Control Panel", route: "/control-panel", icon: "CogIcon" },
+    // { text: "Auction", route: "/auction", icon: "ShoppingBagIcon" },
+    // { text: "Data Upload", route: "/data-upload", icon: "CloudArrowUpIcon" },
+    // { text: "Control Panel", route: "/control-panel", icon: "CogIcon" },
     { text: "User Management", route: "/user-management", icon: "UserGroupIcon" },
     { text: "Permissions", route: "/permissions", icon: "LockClosedIcon" },
     { text: "Readme", route: "/Readme", icon: "LockClosedIcon" },
@@ -112,15 +112,43 @@ function Sidebar() {
           </ul>
         </div>
 
-        <div className="p-4">
-          <LogoutButton className="w-full" />
-        </div>
+        <div className="py-12 px-2 ">
+      {/* Dark Mode Toggle Button */}
+      <button
+        onClick={toggleTheme}
+        className={`w-full flex items-center p-3 rounded-lg transition-colors duration-200 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 ${
+          isClosed ? "justify-center" : ""
+        }`}
+        aria-label="Toggle theme"
+      >
+        {theme === 'light' ? (
+          <svg className="w-6 h-6 min-w-[24px]" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" />
+          </svg>
+        ) : (
+          <svg className="w-6 h-6 min-w-[24px]" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z" clipRule="evenodd" />
+          </svg>
+        )}
+        <span className={`ml-3 font-medium ${isClosed ? "hidden" : "block"}`}>
+          {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+        </span>
+      </button>
+      
+      {/* Logout Button */}
+      <LogoutButton 
+        className={`w-full flex items-center p-3 rounded-lg transition-colors duration-200 text-red-500 hover:bg-red-100 dark:hover:bg-red-900 ${
+          isClosed ? "justify-center" : ""
+        }`}
+      />
+    </div>
 
-        <div className={`hidden md:block p-4 border-t border-gray-200 dark:border-gray-700 text-center ${isClosed ? "hidden" : "block"}`}>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Powered by <span className="text-blue-800 dark:text-blue-300 font-medium">resollect</span>
-          </p>
-        </div>
+    <div className={`hidden md:block p-4 border-t border-gray-200 dark:border-gray-700 text-center ${isClosed ? "hidden" : "block"}`}>
+      <p className="text-xs text-gray-500 dark:text-gray-400">
+        Powered by <span className="text-blue-800 dark:text-blue-300 font-medium">resollect</span>
+      </p>
+    </div>
+        
       </aside>
 
       {isSidebarOpen && (

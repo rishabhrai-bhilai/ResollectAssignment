@@ -26,11 +26,9 @@ function Portfolio() {
   const [selectedColumn, setSelectedColumn] = useState(null);
   const itemsPerPage = 10;
 
-  useEffect(() => async () => {
+  useEffect(() => {
     setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      setLoading(false);
       const fetchedLoans = getLoans();
       setLoans(fetchedLoans);
       setFilteredLoans(fetchedLoans);
@@ -39,6 +37,7 @@ function Portfolio() {
         setFields(loanFields);
       }
       
+      setLoading(false);
     } catch (err) {
       setError("Failed to load loans.");
       setLoading(false);
@@ -289,7 +288,7 @@ function Portfolio() {
         </div>
         <div className="hidden sm:block mt-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-x-auto">
           <div className="space-y-2 p-4">
-            {Array(8).fill().map((_, i) => (
+            {Array(5).fill().map((_, i) => (
               <div key={i} className="h-12 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-md"></div>
             ))}
           </div>
