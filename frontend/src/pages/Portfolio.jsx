@@ -26,19 +26,19 @@ function Portfolio() {
   const [selectedColumn, setSelectedColumn] = useState(null);
   const itemsPerPage = 10;
 
-  useEffect(() => {
+  useEffect(() => async () => {
     setLoading(true);
     try {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      setLoading(false);
       const fetchedLoans = getLoans();
       setLoans(fetchedLoans);
       setFilteredLoans(fetchedLoans);
-
       if (fetchedLoans.length > 0) {
         const loanFields = Object.keys(fetchedLoans[0]).filter((key) => key !== "id");
         setFields(loanFields);
       }
-
-      setLoading(false);
+      
     } catch (err) {
       setError("Failed to load loans.");
       setLoading(false);
@@ -216,7 +216,7 @@ function Portfolio() {
   const openMobileFilter = () => {
     setIsMobileFilterOpen(true);
     setTempFilters({ ...columnFilters });
-    setSelectedColumn(null); // Fixed typo here
+    setSelectedColumn(null);
   };
 
   const closeMobileFilter = () => {
@@ -225,10 +225,13 @@ function Portfolio() {
     setSelectedColumn(null);
   };
 
-  const clearAllFilters = () => {
-    setColumnFilters({});
-    setTempFilters({});
-    setSelectedColumn(null);
+  const clearFilters = () => {
+    setSearchTerm("");            // Clear the search bar input
+    setColumnFilters({});         // Clear active column filters
+    setTempFilters({});           // Clear temporary filters in mobile UI
+    setSelectedColumn(null);      // Reset selected column
+    setIsMobileFilterOpen(false); // Close mobile filter modal if open
+    setCurrentPage(1);            // Reset to first page
   };
 
   const handleColumnSelect = (column) => {
@@ -239,7 +242,6 @@ function Portfolio() {
     if (Array.isArray(filteredData)) {
       return filteredData.map((loan) => ({ loan, group: null }));
     }
-
     const flattened = [];
     Object.keys(filteredData).forEach((group) => {
       filteredData[group].forEach((loan) => {
@@ -279,16 +281,16 @@ function Portfolio() {
 
   if (loading) {
     return (
-      <div className="p-4 sm:p-6">
+      <div className="p-4 sm:p-6 bg-blue-50 dark:bg-gray-800">
         <div className="space-y-4 sm:hidden mt-4">
           {Array(5).fill().map((_, i) => (
-            <div key={i} className="h-32 bg-gray-200 animate-pulse rounded-lg"></div>
+            <div key={i} className="h-32 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-lg"></div>
           ))}
         </div>
-        <div className="hidden sm:block mt-4 bg-white rounded-lg shadow-lg overflow-x-auto">
+        <div className="hidden sm:block mt-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-x-auto">
           <div className="space-y-2 p-4">
-            {Array(5).fill().map((_, i) => (
-              <div key={i} className="h-12 bg-gray-200 animate-pulse rounded-md"></div>
+            {Array(8).fill().map((_, i) => (
+              <div key={i} className="h-12 bg-gray-200 dark:bg-gray-700 animate-pulse rounded-md"></div>
             ))}
           </div>
         </div>
@@ -298,8 +300,8 @@ function Portfolio() {
 
   if (error) {
     return (
-      <div className="p-4 sm:p-6 text-red-500">
-        <div className="mt-4 text-center text-red-500 p-4 bg-red-50 rounded-lg border border-red-200">
+      <div className="p-4 sm:p-6 text-red-500 dark:text-red-400 bg-blue-50 dark:bg-gray-800">
+        <div className="mt-4 text-center text-red-500 dark:text-red-400 p-4 bg-red-50 dark:bg-red-900/50 rounded-lg border border-red-200 dark:border-red-700">
           {error}
         </div>
       </div>
@@ -307,14 +309,13 @@ function Portfolio() {
   }
 
   return (
-    <div className="px-4 py-1 pt-8 md:pt-4">
+    <div className="px-4 py-1 pt-8 md:pt-4  dark:bg-gray-800">
       <div className="flex justify-between items-center mb-2">
-        <h1 className="text-xl sm:text-2xl font-bold">PORTFOLIO</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">PORTFOLIO</h1>
         <div className="flex items-center space-x-2">
-          
           <button
-            onClick={clearAllFilters}
-            className=" sm:block  text-red-500 text-sm font-medium hover:text-red-600 transition-colors"
+            onClick={clearFilters} // Unified clearFilters for all screens
+            className="sm:block text-red-500 dark:text-red-400 text-sm font-medium hover:text-red-600 dark:hover:text-red-300 transition-colors"
           >
             Clear Filter
           </button>
@@ -337,8 +338,8 @@ function Portfolio() {
             onClick={() => handleTabChange(tab)}
             className={`px-3 py-1 text-xs sm:text-sm font-medium rounded-lg border-b-2 transition-colors whitespace-nowrap ${
               selectedTab === tab
-                ? "bg-blue-600 text-white border-blue-600"
-                : "bg-transparent text-gray-600 border-transparent hover:bg-gray-100"
+                ? "bg-blue-600 text-white dark:bg-blue-700 dark:text-gray-100 border-blue-600 dark:border-blue-700"
+                : "bg-transparent text-gray-600 dark:text-gray-400 border-transparent hover:bg-gray-100 dark:hover:bg-gray-700"
             }`}
           >
             {tab}
@@ -352,13 +353,13 @@ function Portfolio() {
           placeholder="Search Loans"
           value={searchTerm}
           onChange={handleSearch}
-          className="border border-blue-200 rounded px-3 py-4 md:py-1 text-xs sm:text-sm w-full sm:w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-blue-200 dark:border-gray-600 rounded px-3 py-4 md:py-1 text-xs sm:text-sm w-full sm:w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
         />
         <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
           <select
             value={groupBy}
             onChange={handleGroupBy}
-            className=" sm:block border border-blue-200 rounded px-3 py-4 md:py-1 text-xs sm:text-sm text-gray-600 focus:outline-none w-full sm:w-auto"
+            className="sm:block border border-blue-200 dark:border-gray-600 rounded px-3 py-4 md:py-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400 focus:outline-none w-full sm:w-auto bg-white dark:bg-gray-700"
           >
             <option value="">Group By...</option>
             {fields.map((field) => (
@@ -367,7 +368,7 @@ function Portfolio() {
               </option>
             ))}
           </select>
-          <button className="hidden md:flex bg-blue-600 text-white px-3 py-1 rounded text-xs sm:text-sm font-medium items-center justify-center w-full sm:w-auto">
+          <button className="hidden md:flex bg-blue-600 dark:bg-blue-700 text-white px-3 py-1 rounded text-xs sm:text-sm font-medium items-center justify-center w-full sm:w-auto">
             <svg
               className="w-3 h-3 sm:w-4 sm:h-4 mr-1"
               fill="none"
@@ -390,7 +391,7 @@ function Portfolio() {
               setLoanToUpdate(null);
               setIsModalOpen(true);
             }}
-            className="hidden md:flex bg-blue-600 text-white px-3 py-1 rounded text-xs sm:text-sm font-medium items-center justify-center w-full sm:w-auto"
+            className="hidden md:flex bg-blue-600 dark:bg-blue-700 text-white px-3 py-1 rounded text-xs sm:text-sm font-medium items-center justify-center w-full sm:w-auto"
           >
             <svg
               className="w-3 h-3 sm:w-4 sm:h-4 mr-1"
@@ -423,16 +424,16 @@ function Portfolio() {
         initialData={loanToUpdate}
       />
 
-      <div className="hidden md:block text-xs sm:text-sm text-gray-600 mb-3 bg-white border border-gray-300 rounded-lg px-3 py-1.5 sm:px-4 sm:py-2">
+      <div className="hidden md:block text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 sm:px-4 sm:py-2">
         {selectedLoans.length} loans selected
       </div>
 
-      <div className=" md:border bg-blue-50 md:bg-gray-50 md:border-gray-300 md:rounded-lg md:shadow">
+      <div className="md:border bg-blue-50 dark:bg-gray-800 md:bg-gray-50 dark:md:bg-gray-900 md:border-gray-300 dark:md:border-gray-700 md:rounded-lg md:shadow">
         <div className="hidden sm:block overflow-x-auto">
-          <table className="min-w-full bg-blue-50 md:bg-gray-50">
+          <table className="min-w-full bg-blue-50 dark:bg-gray-800 md:bg-gray-50 dark:md:bg-gray-900">
             <thead>
               <tr>
-                <th className="px-4 py-2 md:px-2 md:py-1 text-left border-b border-gray-300 text-xs md:text-[10px] text-gray-600">
+                <th className="px-4 py-2 md:px-2 md:py-1 text-left border-b border-gray-300 dark:border-gray-600 text-xs md:text-[10px] text-gray-600 dark:text-gray-400">
                   <input
                     type="checkbox"
                     onChange={handleSelectAll}
@@ -440,12 +441,13 @@ function Portfolio() {
                       paginatedLoans.length > 0 &&
                       paginatedLoans.every((item) => selectedLoans.includes(item.loan.id))
                     }
+                    className="text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded"
                   />
                 </th>
                 {fields.map((field) => (
                   <th
                     key={field}
-                    className="px-4 py-2 md:px-2 md:py-1 text-left border-b border-gray-300 text-xs md:text-[10px] text-gray-600"
+                    className="px-4 py-2 md:px-2 md:py-1 text-left border-b border-gray-300 dark:border-gray-600 text-xs md:text-[10px] text-gray-600 dark:text-gray-400"
                   >
                     <div className="flex items-center">
                       {formatFieldName(field)}
@@ -456,7 +458,7 @@ function Portfolio() {
                           viewBox="0 0 24 24"
                           strokeWidth={1.5}
                           stroke="currentColor"
-                          className="size-4 md:size-3 text-gray-600"
+                          className="size-4 md:size-3 text-gray-600 dark:text-gray-400"
                         >
                           <path
                             strokeLinecap="round"
@@ -468,7 +470,7 @@ function Portfolio() {
                     </div>
                   </th>
                 ))}
-                <th className="px-4 py-2 md:px-2 md:py-1 text-left border-b border-gray-300 text-xs md:text-[10px] text-gray-600">
+                <th className="px-4 py-2 md:px-2 md:py-1 text-left border-b border-gray-300 dark:border-gray-600 text-xs md:text-[10px] text-gray-600 dark:text-gray-400">
                   Actions
                 </th>
               </tr>
@@ -487,33 +489,34 @@ function Portfolio() {
                         <tr key={`group-${group}`}>
                           <td
                             colSpan={fields.length + 2}
-                            className="px-4 py-2 md:px-2 md:py-1 font-bold text-xs md:text-[10px] text-gray-600 bg-gray-100"
+                            className="px-4 py-2 md:px-2 md:py-1 font-bold text-xs md:text-[10px] text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700"
                           >
                             {group}
                           </td>
                         </tr>
                       )}
-                      <tr key={loan.id} className="border-t border-gray-300">
+                      <tr key={loan.id} className="border-t border-gray-300 dark:border-gray-600">
                         <td className="px-4 py-2 md:px-2 md:py-1">
                           <input
                             type="checkbox"
                             checked={selectedLoans.includes(loan.id)}
                             onChange={() => handleSelectLoan(loan.id)}
+                            className="text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded"
                           />
                         </td>
                         {fields.map((field) => (
-                          <td key={field} className="px-4 py-2 md:px-2 md:py-1 text-xs md:text-[10px] text-gray-600">
+                          <td key={field} className="px-4 py-2 md:px-2 md:py-1 text-xs md:text-[10px] text-gray-600 dark:text-gray-400">
                             {field === "sanctionAmount"
                               ? `₹ ${loan[field].toLocaleString()}`
                               : loan[field]}
                           </td>
                         ))}
-                        <td className="px-4 py-2 md:px-2 md:py-1 text-xs md:text-[10px] text-gray-600">
+                        <td className="px-4 py-2 md:px-2 md:py-1 text-xs md:text-[10px] text-gray-600 dark:text-gray-400">
                           {selectedLoans.includes(loan.id) && (
                             <div className="flex space-x-2 md:space-x-1">
                               <button
                                 onClick={() => handleUpdateLoan(loan)}
-                                className="text-blue-600 hover:text-blue-800"
+                                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
                                 title="Update"
                               >
                                 <svg
@@ -533,7 +536,7 @@ function Portfolio() {
                               </button>
                               <button
                                 onClick={() => handleDeleteLoan(loan.id)}
-                                className="text-red-600 hover:text-red-800"
+                                className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
                                 title="Delete"
                               >
                                 <svg
@@ -562,7 +565,7 @@ function Portfolio() {
                 <tr>
                   <td
                     colSpan={fields.length + 2}
-                    className="px-4 py-2 md:px-2 md:py-1 text-center text-xs md:text-[10px] text-gray-600"
+                    className="px-4 py-2 md:px-2 md:py-1 text-center text-xs md:text-[10px] text-gray-600 dark:text-gray-400"
                   >
                     No loans found.
                   </td>
@@ -572,7 +575,7 @@ function Portfolio() {
           </table>
         </div>
 
-        <div className="block bg-blue-50 sm:hidden space-y-4">
+        <div className="block bg-blue-50 dark:bg-gray-800 sm:hidden space-y-4">
           {paginatedLoans.length > 0 ? (
             paginatedLoans.map((item, index) => {
               const { loan, group } = item;
@@ -583,39 +586,37 @@ function Portfolio() {
               const getBadgeColor = (loanType) => {
                 switch (loanType.toLowerCase()) {
                   case "home loan":
-                    return "bg-blue-100 text-blue-800";
+                    return "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200";
                   case "car loan":
-                    return "bg-purple-100 text-purple-800";
+                    return "bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200";
                   case "personal loan":
-                    return "bg-green-100 text-green-800";
+                    return "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200";
                   case "education loan":
-                    return "bg-yellow-100 text-yellow-800";
+                    return "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200";
                   case "business loan":
-                    return "bg-red-100 text-red-800";
+                    return "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200";
                   case "mortgage loan":
-                    return "bg-indigo-100 text-indigo-800";
+                    return "bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200";
                   default:
-                    return "bg-gray-100 text-gray-800";
+                    return "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200";
                 }
               };
 
               return (
                 <div key={loan.id}>
                   {showGroupHeader && (
-                    <div className="font-bold text-xs text-gray-600 bg-gray-100 p-2 rounded mb-2">
+                    <div className="font-bold text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 p-2 rounded mb-2">
                       {group}
                     </div>
                   )}
-                  <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
+                  <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
                     <div className="flex justify-between items-start">
                       <div className="space-y-1">
-                        <h3 className="text-sm font-semibold text-gray-900">{loan.loanNo}</h3>
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{loan.loanNo}</h3>
                         <div className="flex items-center space-x-2">
-                          <p className="text-xs text-gray-600">{loan.borrower}</p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">{loan.borrower}</p>
                           <span
-                            className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full ${getBadgeColor(
-                              loan.loanType
-                            )}`}
+                            className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full ${getBadgeColor(loan.loanType)}`}
                           >
                             {loan.loanType}
                           </span>
@@ -626,12 +627,13 @@ function Portfolio() {
                           type="checkbox"
                           checked={selectedLoans.includes(loan.id)}
                           onChange={() => handleSelectLoan(loan.id)}
+                          className="text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded"
                         />
                         {selectedLoans.includes(loan.id) && (
                           <div className="flex space-x-2">
                             <button
                               onClick={() => handleUpdateLoan(loan)}
-                              className="text-blue-600 hover:text-blue-800"
+                              className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
                               title="Update"
                             >
                               <svg
@@ -651,7 +653,7 @@ function Portfolio() {
                             </button>
                             <button
                               onClick={() => handleDeleteLoan(loan.id)}
-                              className="text-red-600 hover:text-red-800"
+                              className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
                               title="Delete"
                             >
                               <svg
@@ -674,12 +676,12 @@ function Portfolio() {
                       </div>
                     </div>
                     {expandedRows[index] && (
-                      <div className="mt-3 pt-3 border-t border-gray-200 text-xs text-gray-700">
-                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                      <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600 text-xs text-gray-700 dark:text-gray-300">
+                        <div className="bg-blue-50 dark:bg-gray-700 p-4 rounded-lg border border-blue-200 dark:border-gray-600">
                           <div className="grid grid-cols-1 gap-4">
                             {fields.map((field) => (
                               <div key={field}>
-                                <span className="font-semibold text-gray-900">{formatFieldName(field)}:</span>{" "}
+                                <span className="font-semibold text-gray-900 dark:text-gray-100">{formatFieldName(field)}:</span>{" "}
                                 {field === "sanctionAmount"
                                   ? `₹ ${loan[field].toLocaleString()}`
                                   : loan[field]}
@@ -691,7 +693,7 @@ function Portfolio() {
                     )}
                     <button
                       onClick={() => toggleAccordion(index)}
-                      className="mt-3 flex items-center text-blue-600 hover:text-blue-700 text-xs font-medium transition-colors duration-200 focus:outline-none"
+                      className="mt-3 flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-xs font-medium transition-colors duration-200 focus:outline-none"
                       aria-label={expandedRows[index] ? "Hide details" : "Show details"}
                     >
                       <FontAwesomeIcon
@@ -705,14 +707,14 @@ function Portfolio() {
               );
             })
           ) : (
-            <div className="text-center text-xs text-gray-600 p-4">
+            <div className="text-center text-xs text-gray-600 dark:text-gray-400 p-4">
               No loans found.
             </div>
           )}
           <div className="fixed bottom-4 right-4 sm:hidden flex space-x-3">
             <button
               onClick={openMobileFilter}
-              className="bg-violet-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center"
+              className="bg-violet-600 dark:bg-violet-700 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 flex items-center"
               aria-label="Open filters"
             >
               <FontAwesomeIcon icon={faFilter} className="mr-2" />
@@ -724,7 +726,7 @@ function Portfolio() {
                 setLoanToUpdate(null);
                 setIsModalOpen(true);
               }}
-              className="bg-violet-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center"
+              className="bg-violet-600 dark:bg-violet-700 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 flex items-center"
               aria-label="Add item"
             >
               <FontAwesomeIcon icon={faPlus} className="mr-2" />
@@ -735,15 +737,15 @@ function Portfolio() {
       </div>
 
       <div className="pb-16 md:pb-0 flex flex-col sm:flex-row sm:justify-between mt-4 space-y-2 sm:space-y-0">
-        <p className="text-xs text-gray-600 text-center sm:text-left">
+        <p className="text-xs text-gray-600 dark:text-gray-400 text-center sm:text-left">
           Total {totalItems} row(s). Page {currentPage} of {totalPages}
         </p>
         <div className="flex justify-center sm:justify-end space-x-2">
           <button
             onClick={handlePreviousPage}
             disabled={currentPage === 1}
-            className={`px-3 py-1 border border-gray-300 rounded text-xs text-gray-600 ${
-              currentPage === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100"
+            className={`px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs text-gray-600 dark:text-gray-400 ${
+              currentPage === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100 dark:hover:bg-gray-700"
             }`}
           >
             Previous
@@ -751,10 +753,10 @@ function Portfolio() {
           <button
             onClick={handleNextPage}
             disabled={currentPage === totalPages || totalPages === 0}
-            className={`px-3 py-1 border border-gray-300 rounded text-xs text-gray-600 ${
+            className={`px-3 py-1 border border-gray-300 dark:border-gray-600 rounded text-xs text-gray-600 dark:text-gray-400 ${
               currentPage === totalPages || totalPages === 0
                 ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-gray-100"
+                : "hover:bg-gray-100 dark:hover:bg-gray-700"
             }`}
           >
             Next
@@ -764,12 +766,12 @@ function Portfolio() {
 
       {isMobileFilterOpen && window.innerWidth < 640 && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-center items-end">
-          <div className="bg-white w-full max-h-[90%] rounded-t-lg shadow-lg p-4 overflow-y-auto scrollbar-hidden">
+          <div className="bg-white dark:bg-gray-800 w-full max-h-[90%] rounded-t-lg shadow-lg p-4 overflow-y-auto scrollbar-hidden">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Filters</h3>
               <button
-                onClick={clearAllFilters}
-                className="text-red-500 text-sm font-medium hover:text-red-600"
+                onClick={clearFilters} // Unified clearFilters for all screens
+                className="text-red-500 dark:text-red-400 text-sm font-medium hover:text-red-600 dark:hover:text-red-300"
               >
                 CLEAR ALL
               </button>
@@ -782,8 +784,8 @@ function Portfolio() {
                     onClick={() => handleColumnSelect(key)}
                     className={`w-full text-left px-4 py-2 mb-2 rounded-md text-sm font-medium ${
                       selectedColumn === key
-                        ? "bg-blue-100 text-blue-800 border border-blue-300"
-                        : "bg-gray-50 text-gray-700 hover:bg-gray-100"
+                        ? "bg-blue-100 dark:bg-blue-700 text-blue-800 dark:text-blue-200 border border-blue-300 dark:border-blue-600"
+                        : "bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"
                     }`}
                   >
                     {formatFieldName(key)}
@@ -796,31 +798,31 @@ function Portfolio() {
                     {uniqueValues[selectedColumn].map((value) => (
                       <label
                         key={value}
-                        className="flex items-center px-2 py-2 hover:bg-gray-100 border-b border-gray-200"
+                        className="flex items-center px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 border-b border-gray-200 dark:border-gray-600"
                       >
                         <input
                           type="checkbox"
-                          className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 rounded"
+                          className="mr-2 h-4 w-4 text-blue-600 dark:text-blue-400 focus:ring-blue-500 dark:focus:ring-blue-400 rounded border-gray-300 dark:border-gray-600"
                           checked={tempFilters[selectedColumn]?.includes(value) || false}
                           onChange={() => handleTempCheckboxChange(selectedColumn, value)}
                         />
-                        <span className="text-sm text-gray-700">{value}</span>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">{value}</span>
                       </label>
                     ))}
                   </div>
                 )}
               </div>
             </div>
-            <div className="mt-4 flex justify-between items-center border-t border-gray-200 pt-4">
+            <div className="mt-4 flex justify-between items-center border-t border-gray-200 dark:border-gray-600 pt-4">
               <button
                 onClick={closeMobileFilter}
-                className="text-gray-600 text-sm font-medium hover:text-gray-800"
+                className="text-gray-600 dark:text-gray-400 text-sm font-medium hover:text-gray-800 dark:hover:text-gray-200"
               >
                 CLOSE
               </button>
               <button
                 onClick={applyMobileFilters}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+                className="bg-blue-600 dark:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors"
               >
                 APPLY
               </button>
